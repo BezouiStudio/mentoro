@@ -6,6 +6,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  sendSignInLinkToEmail, // Import sendSignInLinkToEmail
+  isSignInWithEmailLink, // Import isSignInWithEmailLink
+  signInWithEmailLink, // Import signInWithEmailLink
 } from 'firebase/auth';
 import {
   getFirestore,
@@ -23,7 +26,7 @@ import {
 } from 'firebase/firestore';
 
 // Import Lucide Icons
-import { Plus, Edit, Trash2, Save, Check, X, DollarSign, Clock, Target, Feather, Briefcase, CalendarDays, ListTodo, BarChart2, LogOut, Settings } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, Check, X, DollarSign, Clock, Target, Feather, Briefcase, CalendarDays, ListTodo, BarChart2, LogOut, Settings, Mail } from 'lucide-react'; // Import Mail icon
 
 
 const firebaseConfig = {
@@ -100,12 +103,24 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordlessEmail, setPasswordlessEmail] = useState(''); // State for passwordless email
   const [error, setError] = useState('');
+  const [infoMessage, setInfoMessage] = useState(''); // State for info messages
+  const [emailLinkSent, setEmailLinkSent] = useState(false); // State to track if email link is sent
+
   const { signup, login } = useAuth();
 
+  // Action code settings for email link
+  const actionCodeSettings = {
+    url: window.location.href, // The URL to redirect to after sign-in.
+    handleCodeInApp: true, // This must be true.
+  };
+
+  // Handle email/password submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setInfoMessage('');
     try {
       if (isLogin) {
         await login(email, password);
@@ -117,56 +132,153 @@ const Auth = () => {
     }
   };
 
+  // Handle sending passwordless email link
+  const handleSendEmailLink = async () => {
+    if (passwordlessEmail.trim() === '') {
+      setError('Please enter your email address.');
+      return;
+    }
+    setError('');
+    setInfoMessage('');
+    try {
+      await sendSignInLinkToEmail(auth, passwordlessEmail, actionCodeSettings);
+      setInfoMessage(`Email link sent to ${passwordlessEmail}. Check your inbox!`);
+      setEmailLinkSent(true);
+      // Save the email locally so we don't need to ask the user for it again
+      window.localStorage.setItem('emailForSignIn', passwordlessEmail);
+    } catch (err) {
+      setError(err.message);
+      setEmailLinkSent(false);
+    }
+  };
+
+  // Effect to handle sign-in with email link on page load
+  useEffect(() => {
+    // Check if the current URL is a sign-in with email link
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      // Get the email from localStorage (saved when the link was sent)
+      let email = window.localStorage.getItem('emailForSignIn');
+      if (!email) {
+        // If email is not in localStorage, prompt the user for it
+        email = window.prompt('Please provide your email for confirmation.');
+      }
+      if (email) {
+        setInfoMessage('Signing in with email link...');
+        signInWithEmailLink(auth, email, window.location.href)
+          .then((result) => {
+            // Clear email from localStorage
+            window.localStorage.removeItem('emailForSignIn');
+            setInfoMessage('Successfully signed in!');
+            setError('');
+            // You might want to redirect the user after successful login
+            // window.location.assign(actionCodeSettings.url); // Or use React Router history
+          })
+          .catch((err) => {
+            setError('Error signing in with email link: ' + err.message);
+            setInfoMessage('');
+          });
+      } else {
+         setError('Email is required to complete sign-in.');
+         setInfoMessage('');
+      }
+    }
+  }, [auth]); // Run this effect only once on component mount
+
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6"> {/* Softened background */}
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-200">
         <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">{isLogin ? 'Welcome Back' : 'Join Mentoro'}</h2>
         {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-5">
-            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
-              Email
-            </label>
-            <input
-              className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
-              Password
-            </label>
-            <input
-              className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <div className="flex flex-col items-center justify-center gap-4">
-            <button
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 transform hover:scale-105"
-              type="submit"
-            >
-              {isLogin ? 'Login' : 'Sign Up'}
-            </button>
-            <button
-              className="inline-block align-baseline font-semibold text-sm text-blue-600 hover:text-blue-800 transition duration-200"
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}
-            </button>
-          </div>
-        </form>
+        {infoMessage && <p className="text-blue-600 text-sm mb-4 text-center">{infoMessage}</p>}
+
+        {/* Email/Password Section */}
+        {!emailLinkSent && ( // Hide email/password if email link is sent
+            <>
+                <form onSubmit={handleSubmit}>
+                <div className="mb-5">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
+                    Email (Password Login)
+                    </label>
+                    <input
+                    className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    />
+                </div>
+                {isLogin && ( // Only show password for login
+                    <div className="mb-6">
+                        <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
+                        Password
+                        </label>
+                        <input
+                        className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        id="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        />
+                    </div>
+                )}
+                <div className="flex flex-col items-center justify-center gap-4 mb-6">
+                    <button
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 transform hover:scale-105"
+                    type="submit"
+                    >
+                    {isLogin ? 'Login with Password' : 'Sign Up with Password'}
+                    </button>
+                    <button
+                    className="inline-block align-baseline font-semibold text-sm text-blue-600 hover:text-blue-800 transition duration-200"
+                    type="button"
+                    onClick={() => setIsLogin(!isLogin)}
+                    >
+                    {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}
+                    </button>
+                </div>
+                </form>
+
+                <div className="relative flex py-5 items-center">
+                    <div className="flex-grow border-t border-gray-300"></div>
+                    <span className="flex-shrink mx-4 text-gray-500 text-sm">OR</span>
+                    <div className="flex-grow border-t border-gray-300"></div>
+                </div>
+            </>
+        )}
+
+
+        {/* Passwordless Sign-in Section */}
+         {!emailLinkSent && ( // Only show passwordless option if email link is not sent
+             <div className="mt-6">
+                 <h3 className="text-xl font-semibold mb-4 text-gray-800 text-center">Login with Email Link</h3>
+                 <div className="mb-4">
+                     <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="passwordlessEmail">
+                         Email (Passwordless Login)
+                     </label>
+                     <input
+                         className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                         id="passwordlessEmail"
+                         type="email"
+                         placeholder="Enter your email for a login link"
+                         value={passwordlessEmail}
+                         onChange={(e) => setPasswordlessEmail(e.target.value)}
+                     />
+                 </div>
+                 <button
+                     className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     onClick={handleSendEmailLink}
+                 >
+                     <Mail size={20} className="mr-2"/> Send Login Link
+                 </button>
+             </div>
+         )}
+
+
       </div>
     </div>
   );
@@ -385,28 +497,28 @@ const WeeklyActions = () => {
                                 className={`text-sm py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 flex items-center justify-center ${action.completed ? 'bg-gray-500 hover:bg-gray-600 text-white' : 'bg-gray-800 hover:bg-gray-700 text-white'}`} // Minimal button style
                                 onClick={() => toggleComplete(action)}
                                 >
-                                 {action.completed ? <X size={16} className="mr-1 sm:mr-1"/> : <Check size={16} className="mr-1 sm:mr-1"/>} <span className="hidden sm:inline">{action.completed ? 'Undo' : 'Complete'}</span> {/* Hide text on small screens */}
+                                 {action.completed ? <X size={16} className="mr-1"/> : <Check size={16} className="mr-1"/>} <span className="hidden sm:inline">{action.completed ? 'Undo' : 'Complete'}</span> {/* Hide text on small screens */}
                             </button>
                             {editingAction === action.id ? (
                                 <button
                                     className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => updateAction(action.id)}
                                 >
-                                    <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                    <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                 </button>
                             ) : (
                                 <button
                                     className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => { setEditingAction(action.id); setEditText(action.text); }}
                                 >
-                                    <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                    <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                 </button>
                             )}
                             <button
                                 className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                 onClick={() => deleteAction(action.id)}
                               >
-                                <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                               </button>
                         </div>
                     </li>
@@ -610,28 +722,28 @@ const DailyHabits = () => {
                                 className={`text-sm py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 flex items-center justify-center ${habit.completedToday ? 'bg-gray-500 hover:bg-gray-600 text-white' : 'bg-gray-800 hover:bg-gray-700 text-white'}`} // Minimal button style
                                 onClick={() => toggleCompleteToday(habit)}
                                 >
-                                {habit.completedToday ? <X size={16} className="mr-1 sm:mr-1"/> : <Check size={16} className="mr-1 sm:mr-1"/>} <span className="hidden sm:inline">{habit.completedToday ? 'Undo' : 'Done Today'}</span> {/* Hide text on small screens */}
+                                {habit.completedToday ? <X size={16} className="mr-1"/> : <Check size={16} className="mr-1"/>} <span className="hidden sm:inline">{habit.completedToday ? 'Undo' : 'Done Today'}</span> {/* Hide text on small screens */}
                             </button>
                             {editingHabit === habit.id ? (
                                 <button
                                     className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => updateHabit(habit.id)}
                                 >
-                                    <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                    <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                 </button>
                             ) : (
                                 <button
                                     className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => { setEditingHabit(habit.id); setEditText(habit.text); }}
                                 >
-                                    <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                    <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                 </button>
                             )}
                             <button
                                 className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                 onClick={() => deleteHabit(habit.id)}
                               >
-                                <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                               </button>
                         </div>
                     </li>
@@ -916,21 +1028,21 @@ const SkillHoursLog = () => {
                                             className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                             onClick={() => updateSkillName(skill.id)}
                                         >
-                                            <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                            <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                         </button>
                                     ) : (
                                         <button
                                             className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                             onClick={() => { setEditingSkill(skill.id); setEditSkillName(skill.skillName); }}
                                         >
-                                            <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                            <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                         </button>
                                     )}
                                      <button
                                         className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                         onClick={() => deleteSkill(skill.id)}
                                     >
-                                        <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                        <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                                     </button>
                                 </div>
                             </li>
@@ -1040,21 +1152,21 @@ const SkillHoursLog = () => {
                                         className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                         onClick={() => updateLog(log.id)}
                                     >
-                                        <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                        <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                     </button>
                                 ) : (
                                     <button
                                         className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                         onClick={() => { setEditingLog(log.id); setEditSkillLogSkill(log.skill); setEditSkillLogHours(log.hours.toString()); }}
                                     >
-                                        <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                        <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                     </button>
                                 )}
                                 <button
                                     className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                     onClick={() => deleteLog(log.id)}
                                 >
-                                    <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                    <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                                 </button>
                             </div>
                         </li>
@@ -1155,21 +1267,21 @@ const PersonalBrandFeed = () => {
                                     className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => updateItem(item.id)}
                                 >
-                                    <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                    <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                 </button>
                             ) : (
                                 <button
                                     className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => { setEditingItem(item.id); setEditText(item.text); }}
                                 >
-                                    <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                    <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                 </button>
                             )}
                             <button
                                 className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                 onClick={() => deleteItem(item.id)}
                               >
-                                <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                               </button>
                         </div>
                     </li>
@@ -1380,21 +1492,21 @@ const Finance = () => {
                                         className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                         onClick={() => updateTransaction(transaction.id)}
                                     >
-                                        <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                        <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                     </button>
                                 ) : (
                                     <button
                                         className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                         onClick={() => { setEditingTransaction(transaction.id); setEditDescription(transaction.description); setEditAmount(transaction.amount.toString()); setEditType(transaction.type); }}
                                     >
-                                        <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                        <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                     </button>
                                 )}
                                 <button
                                     className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                     onClick={() => deleteTransaction(transaction.id)}
                                 >
-                                    <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                    <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                                 </button>
                             </div>
                         </li>
