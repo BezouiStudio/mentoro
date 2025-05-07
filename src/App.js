@@ -107,6 +107,7 @@ const Auth = () => {
   const [error, setError] = useState('');
   const [infoMessage, setInfoMessage] = useState(''); // State for info messages
   const [emailLinkSent, setEmailLinkSent] = useState(false); // State to track if email link is sent
+  const [showPasswordless, setShowPasswordless] = useState(false); // State to toggle passwordless section visibility
 
   const { signup, login } = useAuth();
 
@@ -186,22 +187,22 @@ const Auth = () => {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6"> {/* Softened background */}
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-200">
-        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">{isLogin ? 'Welcome Back' : 'Join Mentoro'}</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 sm:p-6"> {/* Lighter background, added padding */}
+      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-sm border border-gray-200"> {/* More rounded corners, larger shadow, slightly wider max-width */}
+        <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center text-gray-800">{isLogin ? 'Welcome Back' : 'Join Mentoro'}</h2> {/* Adjusted font size and spacing */}
         {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
         {infoMessage && <p className="text-blue-600 text-sm mb-4 text-center">{infoMessage}</p>}
 
         {/* Email/Password Section */}
-        {!emailLinkSent && ( // Hide email/password if email link is sent
+        {!emailLinkSent && !showPasswordless && ( // Hide email/password if email link is sent or passwordless is shown
             <>
                 <form onSubmit={handleSubmit}>
-                <div className="mb-5">
+                <div className="mb-4"> {/* Adjusted margin */}
                     <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
-                    Email (Password Login)
+                    Email
                     </label>
                     <input
-                    className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" // Adjusted padding
                     id="email"
                     type="email"
                     placeholder="Enter your email"
@@ -210,25 +211,24 @@ const Auth = () => {
                     required
                     />
                 </div>
-                {isLogin && ( // Only show password for login
-                    <div className="mb-6">
-                        <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
-                        Password
-                        </label>
-                        <input
-                        className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                        id="password"
-                        type="password"
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        />
-                    </div>
-                )}
-                <div className="flex flex-col items-center justify-center gap-4 mb-6">
+                {/* Password input is now always shown in this section */}
+                <div className="mb-6">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
+                    Password
+                    </label>
+                    <input
+                    className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" // Adjusted padding
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    />
+                </div>
+                <div className="flex flex-col items-center justify-center gap-3 mb-6"> {/* Adjusted gap */}
                     <button
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 transform hover:scale-105"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 transform hover:scale-105" // Adjusted padding
                     type="submit"
                     >
                     {isLogin ? 'Login with Password' : 'Sign Up with Password'}
@@ -243,17 +243,22 @@ const Auth = () => {
                 </div>
                 </form>
 
-                <div className="relative flex py-5 items-center">
-                    <div className="flex-grow border-t border-gray-300"></div>
-                    <span className="flex-shrink mx-4 text-gray-500 text-sm">OR</span>
-                    <div className="flex-grow border-t border-gray-300"></div>
+                {/* Option to show passwordless login */}
+                <div className="text-center mt-4">
+                    <button
+                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200"
+                        type="button"
+                        onClick={() => setShowPasswordless(true)}
+                    >
+                        Prefer passwordless login?
+                    </button>
                 </div>
             </>
         )}
 
 
         {/* Passwordless Sign-in Section */}
-         {!emailLinkSent && ( // Only show passwordless option if email link is not sent
+         {!emailLinkSent && showPasswordless && ( // Only show passwordless option if email link is not sent and showPasswordless is true
              <div className="mt-6">
                  <h3 className="text-xl font-semibold mb-4 text-gray-800 text-center">Login with Email Link</h3>
                  <div className="mb-4">
@@ -261,7 +266,7 @@ const Auth = () => {
                          Email (Passwordless Login)
                      </label>
                      <input
-                         className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                         className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200" // Adjusted padding
                          id="passwordlessEmail"
                          type="email"
                          placeholder="Enter your email for a login link"
@@ -270,11 +275,28 @@ const Auth = () => {
                      />
                  </div>
                  <button
-                     className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 transform hover:scale-105 flex items-center justify-center" // Adjusted padding
                      onClick={handleSendEmailLink}
                  >
                      <Mail size={20} className="mr-2"/> Send Login Link
                  </button>
+                  {/* Option to go back to password login */}
+                <div className="text-center mt-4">
+                    <button
+                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200"
+                        type="button"
+                        onClick={() => setShowPasswordless(false)}
+                    >
+                        Back to password login
+                    </button>
+                </div>
+             </div>
+         )}
+
+         {/* Show message when email link is sent */}
+         {emailLinkSent && (
+             <div className="mt-6 text-center text-blue-600 text-lg">
+                 Email link sent! Check your inbox to complete login.
              </div>
          )}
 
@@ -1490,21 +1512,21 @@ const Finance = () => {
                                 {editingTransaction === transaction.id ? (
                                     <button
                                         className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
-                                        onClick={() => updateTransaction(transaction.id)}
+                                        onClick={() => updateTransaction(log.id)}
                                     >
                                         <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                     </button>
                                 ) : (
                                     <button
                                         className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
-                                        onClick={() => { setEditingTransaction(transaction.id); setEditDescription(transaction.description); setEditAmount(transaction.amount.toString()); setEditType(transaction.type); }}
+                                        onClick={() => { setEditingTransaction(log.id); setEditDescription(log.description); setEditAmount(log.amount.toString()); setEditType(log.type); }}
                                     >
                                         <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                     </button>
                                 )}
                                 <button
                                     className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
-                                    onClick={() => deleteTransaction(transaction.id)}
+                                    onClick={() => deleteTransaction(log.id)}
                                 >
                                     <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                                 </button>
@@ -1671,6 +1693,9 @@ const App = () => {
           }
            .rounded-xl {
             border-radius: 0.75rem;
+          }
+           .rounded-2xl { /* Added for the Auth card */
+            border-radius: 1rem;
           }
           button, a {
             transition: all 0.2s ease-in-out;
