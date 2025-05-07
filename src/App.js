@@ -1512,21 +1512,21 @@ const Finance = () => {
                                 {editingTransaction === transaction.id ? (
                                     <button
                                         className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
-                                        onClick={() => updateTransaction(log.id)}
+                                        onClick={() => updateTransaction(transaction.id)}
                                     >
                                         <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                     </button>
                                 ) : (
                                     <button
                                         className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
-                                        onClick={() => { setEditingTransaction(log.id); setEditDescription(log.description); setEditAmount(log.amount.toString()); setEditType(log.type); }}
+                                        onClick={() => { setEditingTransaction(transaction.id); setEditDescription(transaction.description); setEditAmount(transaction.amount.toString()); setEditType(transaction.type); }}
                                     >
                                         <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                     </button>
                                 )}
                                 <button
                                     className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
-                                    onClick={() => deleteTransaction(log.id)}
+                                    onClick={() => deleteTransaction(transaction.id)}
                                 >
                                     <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                                 </button>
