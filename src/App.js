@@ -27,7 +27,8 @@ import {
 } from 'firebase/firestore';
 
 // Import Lucide Icons
-import { Plus, Edit, Trash2, Save, Check, X, DollarSign, Clock, Target, Feather, Briefcase, CalendarDays, ListTodo, BarChart2, LogOut, Settings, Mail, Lock, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react'; // Added Chevron icons
+import { Plus, Edit, Trash2, Save, Check, X, DollarSign, Clock, Target, Feather, Briefcase, CalendarDays, ListTodo, BarChart2, LogOut, Settings, Mail, Lock, Lightbulb, ChevronDown, ChevronUp, Menu, X as CloseIcon, Moon, Sun, Monitor } from 'lucide-react'; // Added Menu, CloseIcon, Moon, Sun, Monitor
+
 
 // Import React Markdown for rendering suggestions
 // You need to install this library: npm install react-markdown or yarn add react-markdown
@@ -213,9 +214,9 @@ const Auth = () => {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 sm:p-6"> {/* Lighter background, added padding */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-sm border border-gray-200"> {/* More rounded corners, larger shadow, slightly wider max-width */}
-        <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center text-gray-800">{isLogin ? 'Welcome Back' : 'Join Mentoro'}</h2> {/* Adjusted font size and spacing */}
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 sm:p-6 dark:bg-gray-900 transition-colors duration-200"> {/* Lighter background, added padding, dark mode */}
+      <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-sm border border-gray-200 dark:border-gray-700 transition-colors duration-200"> {/* More rounded corners, larger shadow, slightly wider max-width, dark mode */}
+        <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center text-gray-800 dark:text-gray-100">{isLogin ? 'Welcome Back' : 'Join Mentoro'}</h2> {/* Adjusted font size and spacing, dark mode */}
         {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
         {infoMessage && <p className="text-blue-600 text-sm mb-4 text-center">{infoMessage}</p>}
 
@@ -224,11 +225,11 @@ const Auth = () => {
             <>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4"> {/* Adjusted margin */}
-                        <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
+                        <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="email">
                         Email
                         </label>
                         <input
-                        className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" // Adjusted padding
+                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Adjusted padding, dark mode
                         id="email"
                         type="email"
                         placeholder="Enter your email"
@@ -239,11 +240,11 @@ const Auth = () => {
                     </div>
                     {/* Password input is now always shown in this section */}
                     <div className="mb-6">
-                        <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
+                        <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="password">
                         Password
                         </label>
                         <input
-                        className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" // Adjusted padding
+                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Adjusted padding, dark mode
                         id="password"
                         type="password"
                         placeholder="Enter your password"
@@ -272,7 +273,7 @@ const Auth = () => {
                  {/* Forgot Password Link */}
                 <div className="text-center mt-4">
                     <button
-                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200"
+                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200 dark:text-gray-400 dark:hover:text-gray-200" // Dark mode
                         type="button"
                         onClick={() => { setShowForgotPassword(true); setError(''); setInfoMessage(''); }} // Show forgot password form
                     >
@@ -283,7 +284,7 @@ const Auth = () => {
                 {/* Option to show passwordless login */}
                 <div className="text-center mt-2"> {/* Adjusted margin */}
                     <button
-                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200"
+                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200 dark:text-gray-400 dark:hover:text-gray-200" // Dark mode
                         type="button"
                         onClick={() => { setShowPasswordless(true); setError(''); setInfoMessage(''); }} // Show passwordless form
                     >
@@ -297,13 +298,13 @@ const Auth = () => {
         {/* Passwordless Sign-in Section */}
          {!emailLinkSent && showPasswordless && !showForgotPassword && ( // Only show passwordless option if email link is not sent and showPasswordless is true, and forgot password is not shown
              <div className="mt-6">
-                 <h3 className="text-xl font-semibold mb-4 text-gray-800 text-center">Login with Email Link</h3>
+                 <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 text-center">Login with Email Link</h3> {/* Dark mode */}
                  <div className="mb-4">
-                     <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="passwordlessEmail">
+                     <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="passwordlessEmail"> {/* Dark mode */}
                          Email (Passwordless Login)
                      </label>
                      <input
-                         className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200" // Adjusted padding
+                         className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Adjusted padding, dark mode
                          id="passwordlessEmail"
                          type="email"
                          placeholder="Enter your email for a login link"
@@ -320,7 +321,7 @@ const Auth = () => {
                   {/* Option to go back to password login */}
                 <div className="text-center mt-4">
                     <button
-                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200"
+                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200 dark:text-gray-400 dark:hover:text-gray-200" // Dark mode
                         type="button"
                         onClick={() => { setShowPasswordless(false); setError(''); setInfoMessage(''); }} // Hide passwordless form
                     >
@@ -333,13 +334,13 @@ const Auth = () => {
         {/* Forgot Password Section */}
         {!emailLinkSent && showForgotPassword && !showPasswordless && ( // Only show if email link not sent, forgot password is true, and passwordless is not shown
             <div className="mt-6">
-                <h3 className="text-xl font-semibold mb-4 text-gray-800 text-center">Forgot Password</h3>
+                <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 text-center">Forgot Password</h3> {/* Dark mode */}
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="forgotPasswordEmail">
+                    <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="forgotPasswordEmail"> {/* Dark mode */}
                         Email Address
                     </label>
                     <input
-                        className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
                         id="forgotPasswordEmail"
                         type="email"
                         placeholder="Enter your email"
@@ -357,7 +358,7 @@ const Auth = () => {
                  {/* Option to go back to login */}
                 <div className="text-center mt-4">
                     <button
-                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200"
+                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200 dark:text-gray-400 dark:hover:text-gray-200" // Dark mode
                         type="button"
                         onClick={() => { setShowForgotPassword(false); setError(''); setInfoMessage(''); }} // Hide forgot password form
                     >
@@ -487,13 +488,13 @@ const Roadmap = () => {
 
 
   return (
-    <div id="roadmap" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
-      <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><Target className="mr-3 text-blue-600" size={28} /> Roadmap</h3>
+    <div id="roadmap" className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md mb-6 transition-colors duration-200"> {/* Added dark mode */}
+      <h3 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 flex items-center"><Target className="mr-3 text-blue-600 dark:text-blue-400" size={28} /> Roadmap</h3> {/* Added dark mode */}
 
       {/* Smart Goal Suggestions Section */}
-       <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-           <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Goal Suggestions</h4> {/* Updated heading and icon */}
-           <p className="text-blue-700 text-sm mb-3">Get smart analysis and suggestions to help you define and achieve your long-term goals more effectively.</p> {/* Updated description */}
+       <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-700 transition-colors duration-200"> {/* Added dark mode */}
+           <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Goal Suggestions</h4> {/* Updated heading and icon, dark mode */}
+           <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart analysis and suggestions to help you define and achieve your long-term goals more effectively.</p> {/* Updated description, dark mode */}
            <button
                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
                onClick={generateRoadmapSuggestions} // Call the static suggestion function
@@ -501,10 +502,10 @@ const Roadmap = () => {
                {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
            </button>
             {showSuggestions && (
-                <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
                     <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
                      <button
-                        className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                        className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
                         onClick={() => setShowSuggestions(false)} // Hide suggestions
                     >
                         Hide Suggestions <ChevronUp size={16} className="ml-1"/>
@@ -517,13 +518,13 @@ const Roadmap = () => {
       <div className="mb-6 flex flex-col sm:flex-row gap-3">
         <input
           type="text"
-          className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+          className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
           placeholder="Add new roadmap item"
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
         />
         <button
-          className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex-shrink-0 flex items-center justify-center" // Minimal button style
+          className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex-shrink-0 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
           onClick={addItem}
         >
           <Plus className="mr-2" size={20} /> Add
@@ -531,34 +532,34 @@ const Roadmap = () => {
       </div>
       <ul>
         {roadmapItems.map(item => (
-          <li key={item.id} className="bg-gray-50 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 shadow-sm">
+          <li key={item.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 dark:border-gray-600 shadow-sm transition-colors duration-200"> {/* Dark mode */}
             {editingItem === item.id ? (
               <input
                 type="text"
-                className="shadow-sm appearance-none border border-gray-300 rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 mr-2 flex-grow w-full sm:w-auto mb-2 sm:mb-0"
+                className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 mr-2 flex-grow w-full sm:w-auto mb-2 sm:mb-0 bg-white dark:bg-gray-800" // Dark mode
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
               />
             ) : (
-              <span className={`flex-grow text-gray-800 text-lg mr-2 mb-2 sm:mb-0 ${item.completed ? 'line-through text-gray-500' : ''}`}>{item.text}</span>
+              <span className={`flex-grow text-gray-800 dark:text-gray-100 text-lg mr-2 mb-2 sm:mb-0 ${item.completed ? 'line-through text-gray-500 dark:text-gray-400' : ''}`}>{item.text}</span> // Dark mode
             )}
             <div className="flex gap-2 flex-shrink-0">
                  <button
-                    className={`text-sm py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 flex items-center justify-center ${item.completed ? 'bg-gray-500 hover:bg-gray-600 text-white' : 'bg-gray-800 hover:bg-gray-700 text-white'}`} // Minimal button style
+                    className={`text-sm py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 flex items-center justify-center ${item.completed ? 'bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200' : 'bg-gray-800 hover:bg-gray-700 text-white dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'}`} // Minimal button style, dark mode
                     onClick={() => toggleComplete(item)}
                     >
                      {item.completed ? <X size={16} className="mr-1 sm:mr-1"/> : <Check size={16} className="mr-1 sm:mr-1"/>} <span className="hidden sm:inline">{item.completed ? 'Undo' : 'Complete'}</span> {/* Hide text on small screens */}
                 </button>
               {editingItem === item.id ? (
                 <button
-                  className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                  className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                   onClick={() => updateItem(item.id)}
                 >
                   <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                 </button>
               ) : (
                 <button
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200" // Minimal button style, dark mode
                   onClick={() => { setEditingItem(item.id); setEditText(item.text); }}
                 >
                   <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
@@ -681,13 +682,13 @@ const WeeklyActions = () => {
 
 
     return (
-        <div id="weeklyActions" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
-            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><CalendarDays className="mr-3 text-blue-600" size={28} /> Weekly Actions</h3>
+        <div id="weeklyActions" className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md mb-6 transition-colors duration-200"> {/* Added dark mode */}
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 flex items-center"><CalendarDays className="mr-3 text-blue-600 dark:text-blue-400" size={28} /> Weekly Actions</h3> {/* Added dark mode */}
 
              {/* Smart Action Suggestions Section */}
-             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                 <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Action Suggestions</h4> {/* Updated heading and icon */}
-                 <p className="text-blue-700 text-sm mb-3">Get smart suggestions for your weekly tasks based on your goals and progress.</p> {/* Updated description */}
+             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-700 transition-colors duration-200"> {/* Added dark mode */}
+                 <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Action Suggestions</h4> {/* Updated heading and icon, dark mode */}
+                 <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart suggestions for your weekly tasks based on your goals and progress.</p> {/* Updated description, dark mode */}
                  <button
                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
                      onClick={generateActionSuggestions} // Call the static suggestion function
@@ -695,10 +696,10 @@ const WeeklyActions = () => {
                      {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
                  </button>
                  {showSuggestions && (
-                     <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                     <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
                          <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
                           <button
-                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
                             onClick={() => setShowSuggestions(false)} // Hide suggestions
                         >
                             Hide Suggestions <ChevronUp size={16} className="ml-1"/>
@@ -711,13 +712,13 @@ const WeeklyActions = () => {
             <div className="mb-6 flex flex-col sm:flex-row gap-3">
                 <input
                     type="text"
-                    className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
                     placeholder="Add new weekly action"
                     value={newAction}
                     onChange={(e) => setNewAction(e.target.value)}
                 />
                 <button
-                  className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex-shrink-0 flex items-center justify-center" // Minimal button style
+                  className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex-shrink-0 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                   onClick={addAction}
                 >
                   <Plus className="mr-2" size={20} /> Add
@@ -725,34 +726,34 @@ const WeeklyActions = () => {
             </div>
             <ul>
                 {actions.map(action => (
-                    <li key={action.id} className="bg-gray-50 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 shadow-sm">
+                    <li key={action.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 dark:border-gray-600 shadow-sm transition-colors duration-200"> {/* Dark mode */}
                         {editingAction === action.id ? (
                             <input
                                 type="text"
-                                className="shadow-sm appearance-none border border-gray-300 rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 mr-2 flex-grow w-full sm:w-auto mb-2 sm:mb-0"
+                                className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 mr-2 flex-grow w-full sm:w-auto mb-2 sm:mb-0 bg-white dark:bg-gray-800" // Dark mode
                                 value={editText}
                                 onChange={(e) => setEditText(e.target.value)}
                             />
                         ) : (
-                            <span className={`flex-grow text-gray-800 text-lg mr-2 mb-2 sm:mb-0 ${action.completed ? 'line-through text-gray-500' : ''}`}>{action.text}</span>
+                            <span className={`flex-grow text-gray-800 dark:text-gray-100 text-lg mr-2 mb-2 sm:mb-0 ${action.completed ? 'line-through text-gray-500 dark:text-gray-400' : ''}`}>{action.text}</span> // Dark mode
                         )}
                         <div className="flex gap-2 flex-shrink-0">
                              <button
-                                className={`text-sm py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 flex items-center justify-center ${action.completed ? 'bg-gray-500 hover:bg-gray-600 text-white' : 'bg-gray-800 hover:bg-gray-700 text-white'}`} // Minimal button style
+                                className={`text-sm py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 flex items-center justify-center ${action.completed ? 'bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200' : 'bg-gray-800 hover:bg-gray-700 text-white dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'}`} // Minimal button style, dark mode
                                 onClick={() => toggleComplete(action)}
                                 >
                                  {action.completed ? <X size={16} className="mr-1 sm:mr-1"/> : <Check size={16} className="mr-1 sm:mr-1"/>} <span className="hidden sm:inline">{action.completed ? 'Undo' : 'Complete'}</span> {/* Hide text on small screens */}
                             </button>
                             {editingAction === action.id ? (
                                 <button
-                                    className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                    className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                                     onClick={() => updateAction(action.id)}
                                 >
                                     <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                 </button>
                             ) : (
                                 <button
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200" // Minimal button style, dark mode
                                     onClick={() => { setEditingAction(action.id); setEditText(action.text); }}
                                 >
                                     <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
@@ -987,13 +988,13 @@ const DailyHabits = () => {
 
 
     return (
-        <div id="dailyHabits" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
-            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><ListTodo className="mr-3 text-blue-600" size={28} /> Daily Habits</h3>
+        <div id="dailyHabits" className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md mb-6 transition-colors duration-200"> {/* Added dark mode */}
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 flex items-center"><ListTodo className="mr-3 text-blue-600 dark:text-blue-400" size={28} /> Daily Habits</h3> {/* Added dark mode */}
 
              {/* Smart Habit Insights Section */}
-             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                 <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Habit Insights</h4> {/* Updated heading and icon */}
-                 <p className="text-blue-700 text-sm mb-3">Get smart analysis and strategies to help you build and maintain consistent daily habits.</p> {/* Updated description */}
+             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-700 transition-colors duration-200"> {/* Added dark mode */}
+                 <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Habit Insights</h4> {/* Updated heading and icon, dark mode */}
+                 <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart analysis and strategies to help you build and maintain consistent daily habits.</p> {/* Updated description, dark mode */}
                  <button
                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
                      onClick={generateHabitSuggestions} // Call the static suggestion function
@@ -1001,10 +1002,10 @@ const DailyHabits = () => {
                      {showSuggestions ? 'Refresh Insights' : 'Get Insights'} {/* Change button text */}
                  </button>
                  {showSuggestions && (
-                     <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                     <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
                          <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
                           <button
-                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
                             onClick={() => setShowSuggestions(false)} // Hide suggestions
                         >
                             Hide Suggestions <ChevronUp size={16} className="ml-1"/>
@@ -1017,13 +1018,13 @@ const DailyHabits = () => {
             <div className="mb-6 flex flex-col sm:flex-row gap-3">
                 <input
                     type="text"
-                    className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
                     placeholder="Add new daily habit"
                     value={newHabit}
                     onChange={(e) => setNewHabit(e.target.value)}
                 />
                  <button
-                  className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex-shrink-0 flex items-center justify-center" // Minimal button style
+                  className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex-shrink-0 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                   onClick={addHabit}
                 >
                   <Plus className="mr-2" size={20} /> Add
@@ -1031,36 +1032,36 @@ const DailyHabits = () => {
             </div>
             <ul>
                 {habits.map(habit => (
-                    <li key={habit.id} className="bg-gray-50 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 shadow-sm">
+                    <li key={habit.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 dark:border-gray-600 shadow-sm transition-colors duration-200"> {/* Dark mode */}
                         {editingHabit === habit.id ? (
                             <input
                                 type="text"
-                                className="shadow-sm appearance-none border border-gray-300 rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 mr-2 flex-grow w-full sm:w-auto mb-2 sm:mb-0"
+                                className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 mr-2 flex-grow w-full sm:w-auto mb-2 sm:mb-0 bg-white dark:bg-gray-800" // Dark mode
                                 value={editText}
                                 onChange={(e) => setEditText(e.target.value)}
                             />
                         ) : (
-                            <span className={`flex-grow text-gray-800 text-lg mr-2 mb-2 sm:mb-0 ${habit.completedToday ? 'line-through text-gray-500' : ''}`}>
-                                {habit.text} <span className="text-sm font-semibold text-blue-600">({habit.streak || 0} day streak)</span>
+                            <span className={`flex-grow text-gray-800 dark:text-gray-100 text-lg mr-2 mb-2 sm:mb-0 ${habit.completedToday ? 'line-through text-gray-500 dark:text-gray-400' : ''}`}>
+                                {habit.text} <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">({habit.streak || 0} day streak)</span> {/* Dark mode */}
                             </span>
                         )}
                         <div className="flex gap-2 flex-shrink-0">
                             <button
-                                className={`text-sm py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 flex items-center justify-center ${habit.completedToday ? 'bg-gray-500 hover:bg-gray-600 text-white' : 'bg-gray-800 hover:bg-gray-700 text-white'}`} // Minimal button style
+                                className={`text-sm py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 flex items-center justify-center ${habit.completedToday ? 'bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200' : 'bg-gray-800 hover:bg-gray-700 text-white dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'}`} // Minimal button style, dark mode
                                 onClick={() => toggleCompleteToday(habit)}
                                 >
                                 {habit.completedToday ? <X size={16} className="mr-1 sm:mr-1"/> : <Check size={16} className="mr-1 sm:mr-1"/>} <span className="hidden sm:inline">{habit.completedToday ? 'Undo' : 'Done Today'}</span> {/* Hide text on small screens */}
                             </button>
                             {editingHabit === habit.id ? (
                                 <button
-                                    className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                    className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                                     onClick={() => updateHabit(habit.id)}
                                 >
                                     <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                 </button>
                             ) : (
                                 <button
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200" // Minimal button style, dark mode
                                     onClick={() => { setEditingHabit(habit.id); setEditText(habit.text); }}
                                 >
                                     <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
@@ -1327,13 +1328,13 @@ const SkillHoursLog = () => {
 
 
     return (
-        <div id="skillLog" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
-            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><Clock className="mr-3 text-blue-600" size={28} /> Skill Hours Log</h3>
+        <div id="skillLog" className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md mb-6 transition-colors duration-200"> {/* Added dark mode */}
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 flex items-center"><Clock className="mr-3 text-blue-600 dark:text-blue-400" size={28} /> Skill Hours Log</h3> {/* Added dark mode */}
 
              {/* Smart Skill Development Suggestions Section */}
-             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                 <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Skill Suggestions</h4> {/* Updated heading and icon */}
-                 <p className="text-blue-700 text-sm mb-3">Get smart suggestions for skill development based on your goals and logged hours.</p> {/* Updated description */}
+             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-700 transition-colors duration-200"> {/* Added dark mode */}
+                 <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Skill Suggestions</h4> {/* Updated heading and icon, dark mode */}
+                 <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart suggestions for skill development based on your goals and logged hours.</p> {/* Updated description, dark mode */}
                  <button
                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
                      onClick={generateSkillSuggestions} // Call the static suggestion function
@@ -1341,10 +1342,10 @@ const SkillHoursLog = () => {
                      {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
                  </button>
                  {showSuggestions && (
-                     <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                     <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
                          <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
                           <button
-                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
                             onClick={() => setShowSuggestions(false)} // Hide suggestions
                         >
                             Hide Suggestions <ChevronUp size={16} className="ml-1"/>
@@ -1357,13 +1358,13 @@ const SkillHoursLog = () => {
              {/* Action Buttons */}
             <div className="mb-6 flex flex-wrap gap-4">
                  <button
-                    className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                    className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                     onClick={() => setShowAddSkillModal(true)} // Open modal
                 >
                     <Plus size={16} className="mr-1"/> Add New Skill
                 </button>
                  <button
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200" // Minimal button style, added dark mode
                     onClick={() => setShowManageSkills(!showManageSkills)} // Toggle manage skills section
                 >
                     <Settings size={16} className="mr-1"/> {showManageSkills ? 'Hide Manage Skills' : 'Manage Skills'}
@@ -1374,15 +1375,15 @@ const SkillHoursLog = () => {
              {/* Add New Skill Modal */}
             {showAddSkillModal && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-                    <div className="relative p-8 border w-full max-w-md md:max-w-lg lg:max-w-xl shadow-lg rounded-xl bg-white">
-                        <h4 className="text-xl font-semibold mb-4 text-gray-800">Add New Skill</h4>
+                    <div className="relative p-8 border w-full max-w-md md:max-w-lg lg:max-w-xl shadow-lg rounded-xl bg-white dark:bg-gray-800 transition-colors duration-200"> {/* Dark mode */}
+                        <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Add New Skill</h4> {/* Dark mode */}
                         <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="newSkillModal">
+                            <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="newSkillModal"> {/* Dark mode */}
                                 Skill Name
                             </label>
                             <input
                                 type="text"
-                                className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                                className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
                                 id="newSkillModal"
                                 placeholder="Enter new skill name"
                                 value={newSkillName}
@@ -1391,13 +1392,13 @@ const SkillHoursLog = () => {
                         </div>
                         <div className="flex justify-end gap-4">
                              <button
-                                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105" // Minimal button style
+                                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200" // Minimal button style, dark mode
                                 onClick={() => { setShowAddSkillModal(false); setNewSkillName(''); }} // Close modal and clear input
                             >
                                 Cancel
                             </button>
                             <button
-                                className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105" // Minimal button style
+                                className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                                 onClick={addNewSkill}
                             >
                                 Add Skill
@@ -1409,32 +1410,32 @@ const SkillHoursLog = () => {
 
             {/* Manage Skills Section (Conditionally Rendered) */}
             {showManageSkills && (
-                 <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-sm border border-gray-200 transition-all duration-300 ease-in-out">
-                    <h4 className="text-xl font-semibold mb-4 text-gray-800">Manage Skills</h4>
+                 <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-all duration-300 ease-in-out"> {/* Dark mode */}
+                    <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Manage Skills</h4> {/* Dark mode */}
                     <ul>
                         {skills.map(skill => (
-                            <li key={skill.id} className="bg-white p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 shadow-sm">
+                            <li key={skill.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 dark:border-gray-600 shadow-sm transition-colors duration-200"> {/* Dark mode */}
                                 {editingSkill === skill.id ? (
                                     <input
                                         type="text"
-                                        className="shadow-sm appearance-none border border-gray-300 rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 mr-2 flex-grow w-full sm:w-auto mb-2 sm:mb-0"
+                                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 mr-2 flex-grow w-full sm:w-auto mb-2 sm:mb-0 bg-white dark:bg-gray-700" // Dark mode
                                         value={editSkillName}
                                         onChange={(e) => setEditSkillName(e.target.value)}
                                     />
                                 ) : (
-                                    <span className="flex-grow text-gray-800 text-lg mr-2 mb-2 sm:mb-0">{skill.skillName}</span>
+                                    <span className="flex-grow text-gray-800 dark:text-gray-100 text-lg mr-2 mb-2 sm:mb-0">{skill.skillName}</span> // Dark mode
                                 )}
                                 <div className="flex gap-2 flex-shrink-0">
                                     {editingSkill === skill.id ? (
                                         <button
-                                            className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                            className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                                             onClick={() => updateSkillName(skill.id)}
                                         >
                                             <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                         </button>
                                     ) : (
                                         <button
-                                            className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                            className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200" // Minimal button style, dark mode
                                             onClick={() => { setEditingSkill(skill.id); setEditSkillName(skill.skillName); }}
                                         >
                                             <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
@@ -1450,7 +1451,7 @@ const SkillHoursLog = () => {
                             </li>
                         ))}
                          {skills.length === 0 && (
-                             <li className="text-gray-600 text-center py-4">No skills added yet. Add a new skill above!</li>
+                             <li className="text-gray-600 dark:text-gray-400 text-center py-4">No skills added yet. Add a new skill above!</li> // Dark mode
                          )}
                     </ul>
                  </div>
@@ -1458,15 +1459,15 @@ const SkillHoursLog = () => {
 
 
             {/* Log Skill Time */}
-            <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
-                <h4 className="text-xl font-semibold mb-4 text-gray-800">Log Time for Existing Skill</h4>
+            <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
+                <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Log Time for Existing Skill</h4> {/* Dark mode */}
                 <div className="flex flex-col sm:flex-row gap-4 items-end"> {/* Aligned items to bottom */}
                     <div className="flex-grow w-full"> {/* Ensured select takes full width on small screens */}
-                         <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="selectSkill">
+                         <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="selectSkill"> {/* Dark mode */}
                             Select Skill
                         </label>
                         <select
-                            className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
+                            className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
                             value={selectedSkill}
                             onChange={(e) => setSelectedSkill(e.target.value)}
                             disabled={skills.length === 0}
@@ -1481,12 +1482,12 @@ const SkillHoursLog = () => {
                         </select>
                     </div>
                     <div className="w-full sm:w-auto"> {/* Ensured input takes full width on small screens */}
-                        <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="hours">
+                        <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="hours"> {/* Dark mode */}
                             Hours
                         </label>
                         <input
                             type="number"
-                            className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                            className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
                             placeholder="Hours"
                             value={hours}
                             onChange={(e) => setHours(e.target.value)}
@@ -1496,7 +1497,7 @@ const SkillHoursLog = () => {
                         />
                     </div>
                     <button
-                        className={`font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 self-end flex-shrink-0 flex items-center justify-center w-full sm:w-auto ${skills.length === 0 ? 'bg-gray-400 cursor-not-allowed text-gray-700' : 'bg-gray-800 hover:bg-gray-700 text-white'}`} // Minimal button style and refined disabled state
+                        className={`font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 self-end flex-shrink-0 flex items-center justify-center w-full sm:w-auto ${skills.length === 0 ? 'bg-gray-400 cursor-not-allowed text-gray-700 dark:bg-gray-600 dark:text-gray-400' : 'bg-gray-800 hover:bg-gray-700 text-white dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'}`} // Minimal button style and refined disabled state, dark mode
                         onClick={addLog}
                         disabled={skills.length === 0}
                     >
@@ -1506,12 +1507,12 @@ const SkillHoursLog = () => {
             </div>
 
             {/* Total Time per Skill */}
-            <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
-                 <h4 className="text-xl font-semibold mb-4 text-gray-800 flex items-center"><BarChart2 className="mr-2 text-blue-600" size={24} /> Total Time per Skill</h4>
+            <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
+                 <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 flex items-center"><BarChart2 className="mr-2 text-blue-600 dark:text-blue-400" size={24} /> Total Time per Skill</h4> {/* Dark mode */}
                 <ul>
                     {Object.entries(totalTimePerSkill).map(([skill, totalHours]) => (
-                        <li key={skill} className="mb-2 text-gray-700 text-lg border-b border-gray-200 pb-2 last:border-b-0">
-                            <strong className="text-gray-800">{skill}:</strong> {totalHours.toFixed(1)} hours
+                        <li key={skill} className="mb-2 text-gray-700 dark:text-gray-200 text-lg border-b border-gray-200 dark:border-gray-600 pb-2 last:border-b-0"> {/* Dark mode */}
+                            <strong className="text-gray-800 dark:text-gray-100">{skill}:</strong> {totalHours.toFixed(1)} hours {/* Dark mode */}
                         </li>
                     ))}
                 </ul>
@@ -1519,23 +1520,23 @@ const SkillHoursLog = () => {
 
 
             {/* Log History */}
-            <div className="p-6 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
-                <h4 className="text-xl font-semibold mb-4 text-gray-800 flex items-center"><Briefcase className="mr-2 text-blue-600" size={24} /> Log History</h4>
+            <div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
+                <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 flex items-center"><Briefcase className="mr-2 text-blue-600 dark:text-blue-400" size={24} /> Log History</h4> {/* Dark mode */}
                  <ul>
                     {logs.map(log => (
-                        <li key={log.id} className="bg-white p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 shadow-sm">
+                        <li key={log.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 dark:border-gray-600 shadow-sm transition-colors duration-200"> {/* Dark mode */}
                              {editingLog === log.id ? (
                                 <div className="flex-grow flex flex-col sm:flex-row gap-3 mr-2 w-full sm:w-auto mb-2 sm:mb-0">
                                     <input
                                         type="text"
-                                        className="shadow-sm appearance-none border border-gray-300 rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 flex-grow"
+                                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 flex-grow bg-white dark:bg-gray-700" // Dark mode
                                         value={editSkillLogSkill}
                                         onChange={(e) => setEditSkillLogSkill(e.target.value)}
                                         placeholder="Skill"
                                     />
                                      <input
                                         type="number"
-                                        className="shadow-sm appearance-none border border-gray-300 rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-20"
+                                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-20 bg-white dark:bg-gray-700" // Dark mode
                                         value={editSkillLogHours}
                                         onChange={(e) => setEditSkillLogHours(e.target.value)}
                                         min="0.1"
@@ -1544,21 +1545,21 @@ const SkillHoursLog = () => {
                                     />
                                 </div>
                              ) : (
-                                <span className="flex-grow text-gray-800 text-lg mr-2 mb-2 sm:mb-0">
-                                    <strong className="text-gray-900">{log.skill}:</strong> {log.hours} hours - <span className="text-sm text-gray-600">{log.timestamp?.toDate().toLocaleString()}</span>
+                                <span className="flex-grow text-gray-800 dark:text-gray-100 text-lg mr-2 mb-2 sm:mb-0"> {/* Dark mode */}
+                                    <strong className="text-gray-900 dark:text-gray-50">{log.skill}:</strong> {log.hours} hours - <span className="text-sm text-gray-600 dark:text-gray-400">{log.timestamp?.toDate().toLocaleString()}</span> {/* Dark mode */}
                                 </span>
                             )}
                             <div className="flex gap-2 flex-shrink-0">
                                 {editingLog === log.id ? (
                                     <button
-                                        className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                        className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                                         onClick={() => updateLog(log.id)}
                                     >
                                         <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                     </button>
                                 ) : (
                                     <button
-                                        className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                        className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200" // Minimal button style, dark mode
                                         onClick={() => { setEditingLog(log.id); setEditSkillLogSkill(log.skill); setEditSkillLogHours(log.hours.toString()); }}
                                     >
                                         <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
@@ -1668,13 +1669,13 @@ const PersonalBrandFeed = () => {
 
 
     return (
-        <div id="brandFeed" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
-            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><Feather className="mr-3 text-blue-600" size={28} /> Personal Brand Feed</h3>
+        <div id="brandFeed" className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md mb-6 transition-colors duration-200"> {/* Added dark mode */}
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 flex items-center"><Feather className="mr-3 text-blue-600 dark:text-blue-400" size={28} /> Personal Brand Feed</h3> {/* Added dark mode */}
 
              {/* Smart Content Suggestions Section */}
-             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                 <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Content Suggestions</h4> {/* Updated heading and icon */}
-                 <p className="text-blue-700 text-sm mb-3">Get smart content ideas and suggestions to help you build your personal brand.</p> {/* Updated description */}
+             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-700 transition-colors duration-200"> {/* Added dark mode */}
+                 <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Content Suggestions</h4> {/* Updated heading and icon, dark mode */}
+                 <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart content ideas and suggestions to help you build your personal brand.</p> {/* Updated description, dark mode */}
                  <button
                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
                      onClick={generateContentSuggestions} // Call the static suggestion function
@@ -1682,10 +1683,10 @@ const PersonalBrandFeed = () => {
                      {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
                  </button>
                  {showSuggestions && (
-                     <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                     <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
                          <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
                           <button
-                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
                             onClick={() => setShowSuggestions(false)} // Hide suggestions
                         >
                             Hide Suggestions <ChevronUp size={16} className="ml-1"/>
@@ -1697,13 +1698,13 @@ const PersonalBrandFeed = () => {
             <div className="mb-6 flex flex-col sm:flex-row gap-3">
                 <input
                     type="text"
-                    className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
                     placeholder="Add a personal brand note or idea"
                     value={newItem}
                     onChange={(e) => setNewItem(e.target.value)}
                 />
                  <button
-                  className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex-shrink-0 flex items-center justify-center" // Minimal button style
+                  className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex-shrink-0 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                   onClick={addItem}
                 >
                   <Plus className="mr-2" size={20} /> Add
@@ -1711,28 +1712,28 @@ const PersonalBrandFeed = () => {
             </div>
              <ul>
                 {feedItems.map(item => (
-                    <li key={item.id} className="bg-gray-50 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 shadow-sm">
+                    <li key={item.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 dark:border-gray-600 shadow-sm transition-colors duration-200"> {/* Dark mode */}
                          {editingItem === item.id ? (
                             <input
                                 type="text"
-                                className="shadow-sm appearance-none border border-gray-300 rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 mr-2 flex-grow w-full sm:w-auto mb-2 sm:mb-0"
+                                className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 mr-2 flex-grow w-full sm:w-auto mb-2 sm:mb-0 bg-white dark:bg-gray-800" // Dark mode
                                 value={editText}
                                 onChange={(e) => setEditText(e.target.value)}
                             />
                         ) : (
-                            <span className="flex-grow text-gray-800 text-lg mr-2 mb-2 sm:mb-0">{item.text}</span>
+                            <span className="flex-grow text-gray-800 dark:text-gray-100 text-lg mr-2 mb-2 sm:mb-0">{item.text}</span> // Dark mode
                         )}
                         <div className="flex gap-2 flex-shrink-0">
                              {editingItem === item.id ? (
                                 <button
-                                    className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                    className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                                     onClick={() => updateItem(item.id)}
                                 >
                                     <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                 </button>
                             ) : (
                                 <button
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200" // Minimal button style, dark mode
                                     onClick={() => { setEditingItem(item.id); setEditText(item.text); }}
                                 >
                                     <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
@@ -1754,9 +1755,9 @@ const PersonalBrandFeed = () => {
 
 const MVPTestLauncher = () => {
     return (
-        <div id="mvpTestLauncher" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
-            <h3 className="text-2xl font-bold mb-6 text-gray-800">MVP Test Launcher</h3>
-            <p className="text-gray-700 text-lg">This section is for launching MVP tests. Implementation details would depend on the nature of the tests.</p>
+        <div id="mvpTestLauncher" className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md mb-6 transition-colors duration-200"> {/* Added dark mode */}
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">MVP Test Launcher</h3> {/* Dark mode */}
+            <p className="text-gray-700 dark:text-gray-200 text-lg">This section is for launching MVP tests. Implementation details would depend on the nature of the tests.</p> {/* Dark mode */}
         </div>
     );
 };
@@ -1889,13 +1890,13 @@ const Finance = () => {
 
 
     return (
-        <div id="finance" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
-            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><DollarSign className="mr-3 text-green-600" size={28} /> Income/Expense</h3>
+        <div id="finance" className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md mb-6 transition-colors duration-200"> {/* Added dark mode */}
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 flex items-center"><DollarSign className="mr-3 text-green-600 dark:text-green-400" size={28} /> Income/Expense</h3> {/* Added dark mode */}
 
              {/* Smart Financial Insights Section */}
-             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                 <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Financial Insights</h4> {/* Updated heading and icon */}
-                 <p className="text-blue-700 text-sm mb-3">Get smart insights and tips to help you manage your finances effectively.</p> {/* Updated description */}
+             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-700 transition-colors duration-200"> {/* Added dark mode */}
+                 <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Financial Insights</h4> {/* Updated heading and icon, dark mode */}
+                 <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart insights and tips to help you manage your finances effectively.</p> {/* Updated description, dark mode */}
                  <button
                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
                      onClick={generateFinancialSuggestions} // Call the static suggestion function
@@ -1903,10 +1904,10 @@ const Finance = () => {
                      {showSuggestions ? 'Refresh Insights' : 'Get Insights'} {/* Change button text */}
                  </button>
                  {showSuggestions && (
-                     <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                     <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
                          <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
                           <button
-                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
                             onClick={() => setShowSuggestions(false)} // Hide suggestions
                         >
                             Hide Suggestions <ChevronUp size={16} className="ml-1"/>
@@ -1916,28 +1917,28 @@ const Finance = () => {
              </div>
 
 
-            <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
-                <h4 className="text-xl font-semibold mb-4 text-gray-800">Add Transaction</h4>
+            <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
+                <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Add Transaction</h4> {/* Dark mode */}
                  <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-grow">
-                        <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="description">
+                        <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="description"> {/* Dark mode */}
                             Description
                         </label>
                         <input
                             type="text"
-                            className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                            className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
                             placeholder="Description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="amount">
+                        <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="amount"> {/* Dark mode */}
                             Amount
                         </label>
                         <input
                             type="number"
-                            className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                            className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
                             placeholder="Amount"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
@@ -1946,11 +1947,11 @@ const Finance = () => {
                         />
                     </div>
                     <div>
-                         <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="type">
+                         <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="type"> {/* Dark mode */}
                             Type
                         </label>
                         <select
-                            className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
+                            className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
                             value={type}
                             onChange={(e) => setType(e.target.value)}
                         >
@@ -1959,7 +1960,7 @@ const Finance = () => {
                         </select>
                     </div>
                      <button
-                        className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 self-end flex-shrink-0 flex items-center justify-center" // Minimal button style
+                        className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 self-end flex-shrink-0 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                         onClick={addTransaction}
                     >
                         <Plus className="mr-2" size={20} /> Add Transaction
@@ -1968,37 +1969,37 @@ const Finance = () => {
             </div>
 
             {/* Summary */}
-            <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
-                 <h4 className="text-xl font-semibold mb-4 text-gray-800">Summary</h4>
-                <p className="text-gray-700 text-lg mb-2">
-                    <strong className="text-emerald-600">Total Income:</strong> ${totalIncome.toFixed(2)} {/* Updated color */}
+            <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
+                 <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Summary</h4> {/* Dark mode */}
+                <p className="text-gray-700 dark:text-gray-200 text-lg mb-2"> {/* Dark mode */}
+                    <strong className="text-emerald-600 dark:text-emerald-400">Total Income:</strong> ${totalIncome.toFixed(2)} {/* Updated color, dark mode */}
                 </p>
-                <p className="text-gray-700 text-lg mb-2">
-                    <strong className="text-red-600">Total Expense:</strong> ${totalExpense.toFixed(2)}
+                <p className="text-gray-700 dark:text-gray-200 text-lg mb-2"> {/* Dark mode */}
+                    <strong className="text-red-600 dark:text-red-400">Total Expense:</strong> ${totalExpense.toFixed(2)}
                 </p>
-                <p className="text-gray-800 text-xl font-bold">
+                <p className="text-gray-800 dark:text-gray-100 text-xl font-bold"> {/* Dark mode */}
                     Net Balance: ${netBalance.toFixed(2)}
                 </p>
             </div>
 
             {/* Transaction History */}
-            <div className="p-6 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
-                <h4 className="text-xl font-semibold mb-4 text-gray-800">Transaction History</h4>
+            <div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
+                <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Transaction History</h4> {/* Dark mode */}
                  <ul>
                     {transactions.map(transaction => (
-                        <li key={transaction.id} className="bg-white p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 shadow-sm">
+                        <li key={transaction.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 dark:border-gray-600 shadow-sm transition-colors duration-200"> {/* Dark mode */}
                              {editingTransaction === transaction.id ? (
                                 <div className="flex-grow flex flex-col sm:flex-row gap-3 mr-2 w-full sm:w-auto mb-2 sm:mb-0">
                                     <input
                                         type="text"
-                                        className="shadow-sm appearance-none border border-gray-300 rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 flex-grow"
+                                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 flex-grow bg-white dark:bg-gray-700" // Dark mode
                                         value={editDescription}
                                         onChange={(e) => setEditDescription(e.target.value)}
                                         placeholder="Description"
                                     />
                                      <input
                                         type="number"
-                                        className="shadow-sm appearance-none border border-gray-300 rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-20"
+                                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-20 bg-white dark:bg-gray-700" // Dark mode
                                         value={editAmount}
                                         onChange={(e) => setEditAmount(e.target.value)}
                                         min="0.01"
@@ -2006,7 +2007,7 @@ const Finance = () => {
                                         placeholder="Amount"
                                     />
                                      <select
-                                        className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-24 bg-white"
+                                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-24 bg-white dark:bg-gray-700" // Dark mode
                                         value={editType}
                                         onChange={(e) => setEditType(e.target.value)}
                                     >
@@ -2015,21 +2016,21 @@ const Finance = () => {
                                     </select>
                                 </div>
                              ) : (
-                                <span className={`flex-grow text-lg mr-2 mb-2 sm:mb-0 ${transaction.type === 'expense' ? 'text-red-600' : 'text-emerald-600'}`}> {/* Updated income text color */}
-                                    <strong className="text-gray-900">{transaction.description}:</strong> ${transaction.amount.toFixed(2)} ({transaction.type}) - <span className="text-sm text-gray-600">{transaction.timestamp?.toDate().toLocaleString()}</span>
+                                <span className={`flex-grow text-lg mr-2 mb-2 sm:mb-0 ${transaction.type === 'expense' ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}> {/* Updated income text color, dark mode */}
+                                    <strong className="text-gray-900 dark:text-gray-50">{transaction.description}:</strong> ${transaction.amount.toFixed(2)} ({transaction.type}) - <span className="text-sm text-gray-600 dark:text-gray-400">{transaction.timestamp?.toDate().toLocaleString()}</span> {/* Dark mode */}
                                 </span>
                             )}
                             <div className="flex gap-2 flex-shrink-0">
                                 {editingTransaction === transaction.id ? (
                                     <button
-                                        className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                        className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                                         onClick={() => updateTransaction(transaction.id)}
                                     >
                                         <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                     </button>
                                 ) : (
                                     <button
-                                        className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
+                                        className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200" // Minimal button style, dark mode
                                         onClick={() => { setEditingTransaction(transaction.id); setEditDescription(transaction.description); setEditAmount(transaction.amount.toString()); setEditType(transaction.type); }}
                                     >
                                         <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
@@ -2051,10 +2052,103 @@ const Finance = () => {
 };
 
 
+const SettingsComponent = ({ onClose }) => {
+    // Initialize theme from localStorage or default to 'system'
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system');
+
+    // Effect to apply the theme class to the root html element
+    useEffect(() => {
+        const applyThemeClass = (selectedTheme) => {
+            const root = document.documentElement;
+            // Remove existing theme classes
+            root.classList.remove('light', 'dark');
+
+            if (selectedTheme === 'system') {
+                // Apply dark class if system prefers dark
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    root.classList.add('dark');
+                } else {
+                    // Apply light class if system prefers light
+                    root.classList.add('light');
+                }
+            } else {
+                // Apply the selected theme class directly
+                root.classList.add(selectedTheme);
+            }
+        };
+
+        // Apply theme when the component mounts
+        applyThemeClass(theme);
+
+        // Save the selected theme to localStorage
+        localStorage.setItem('theme', theme);
+
+        // Listen for system theme changes if theme is set to 'system'
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleSystemThemeChange = () => {
+            if (theme === 'system') {
+                applyThemeClass('system');
+            }
+        };
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+
+        // Cleanup listener on component unmount
+        return () => {
+            mediaQuery.removeEventListener('change', handleSystemThemeChange);
+        };
+
+    }, [theme]); // Re-run effect when theme changes
+
+
+    const handleThemeChange = (newTheme) => {
+        setTheme(newTheme);
+    };
+
+    return (
+        <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md transition-colors duration-200"> {/* Dark mode */}
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 flex items-center"><Settings size={28} className="mr-3 text-blue-600 dark:text-blue-400" /> Settings</h3> {/* Dark mode */}
+            <div className="mb-4">
+                <h4 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">Theme</h4> {/* Dark mode */}
+                <div className="flex flex-wrap gap-4"> {/* Added flex-wrap for smaller screens */}
+                    <button
+                        className={`flex items-center px-4 py-2 rounded-lg transition duration-200 ${theme === 'light' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'}`} // Dark mode colors for inactive state
+                        onClick={() => handleThemeChange('light')}
+                    >
+                        <Sun size={20} className="mr-2"/> Light
+                    </button>
+                    <button
+                        className={`flex items-center px-4 py-2 rounded-lg transition duration-200 ${theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'}`} // Dark mode colors for inactive state
+                        onClick={() => handleThemeChange('dark')}
+                    >
+                        <Moon size={20} className="mr-2"/> Dark
+                    </button>
+                    <button
+                         className={`flex items-center px-4 py-2 rounded-lg transition duration-200 ${theme === 'system' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'}`} // Dark mode colors for inactive state
+                        onClick={() => handleThemeChange('system')}
+                    >
+                        <Monitor size={20} className="mr-2"/> System
+                    </button>
+                </div>
+            </div>
+            {/* Add other settings options here */}
+             <button
+                className="mt-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Dark mode
+                onClick={onClose}
+            >
+                Close Settings
+            </button>
+        </div>
+    );
+};
+
+
 const Dashboard = () => {
   const { currentUser, logout } = useAuth();
   // Initialize activeTab from localStorage or default to 'roadmap'
   const [activeTab, setActiveTab] = useState(localStorage.getItem('activeTab') || 'roadmap');
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for hamburger menu
+  const [showSettings, setShowSettings] = useState(false); // State to show settings component
+
 
   // Ref for the navigation bar container
   const navRef = useRef(null);
@@ -2080,8 +2174,26 @@ const Dashboard = () => {
     return () => clearTimeout(timer); // Clean up the timer
   }, [activeTab]); // Depend on activeTab
 
+  const handleTabClick = (tab) => {
+      setActiveTab(tab);
+      setIsMenuOpen(false); // Close menu on tab click
+      setShowSettings(false); // Hide settings if open
+  }
+
+  const handleSettingsClick = () => {
+      setShowSettings(true);
+      setIsMenuOpen(false); // Close menu when opening settings
+  }
+
+  const handleCloseSettings = () => {
+      setShowSettings(false);
+  }
+
 
   const renderContent = () => {
+      if (showSettings) {
+          return <SettingsComponent onClose={handleCloseSettings} />;
+      }
     switch (activeTab) {
       case 'roadmap':
         return <Roadmap />;
@@ -2103,11 +2215,29 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4"> {/* Softened background */}
-      <header className="bg-white shadow-md py-4 px-6 flex flex-col sm:flex-row justify-between items-center rounded-xl mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4 sm:mb-0">Mentoro</h1>
-        <div className="flex items-center flex-col sm:flex-row gap-4">
-          <span className="text-gray-700 text-lg">Welcome, {currentUser?.email}</span>
+    <div className="min-h-screen bg-gray-50 p-4 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200"> {/* Softened background, added dark mode */}
+      <header className="bg-white dark:bg-gray-800 shadow-md py-4 px-6 flex justify-between items-center rounded-xl mb-6 transition-colors duration-200"> {/* Added dark mode */}
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Mentoro</h1> {/* Added dark mode */}
+
+        {/* Hamburger Menu Button (Visible on small screens) */}
+        <button
+            className="sm:hidden text-gray-800 dark:text-gray-100 focus:outline-none" // Dark mode for icon color
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+        >
+            {isMenuOpen ? <CloseIcon size={28} /> : <Menu size={28} />}
+        </button>
+
+
+        {/* Desktop Menu (Visible on larger screens) */}
+        <div className="hidden sm:flex items-center gap-4">
+          <span className="text-gray-700 dark:text-gray-300 text-lg">Welcome, {currentUser?.email}</span> {/* Added dark mode */}
+           <button
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, added dark mode
+                onClick={handleSettingsClick}
+            >
+                <Settings size={20} className="mr-2"/> Settings
+            </button>
           <button
             className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
             onClick={logout}
@@ -2116,14 +2246,89 @@ const Dashboard = () => {
           </button>
         </div>
       </header>
+
+      {/* Mobile Menu (Visible on small screens when open) */}
+      {isMenuOpen && (
+          <div className="sm:hidden fixed inset-0 bg-white dark:bg-gray-800 z-50 flex flex-col p-6 transition-colors duration-200"> {/* Added dark mode */}
+              <div className="flex justify-between items-center mb-6">
+                   <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Menu</h2> {/* Added dark mode */}
+                   <button
+                       className="text-gray-800 dark:text-gray-100 focus:outline-none" // Dark mode for icon color
+                       onClick={() => setIsMenuOpen(false)}
+                       aria-label="Close menu"
+                   >
+                       <CloseIcon size={28} />
+                   </button>
+              </div>
+              <nav className="flex flex-col gap-4">
+                   <button
+                       className={`text-left text-lg py-2 px-3 rounded-lg transition duration-200 ${activeTab === 'roadmap' ? 'bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900 dark:text-blue-200' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'}`} // Dark mode
+                       onClick={() => handleTabClick('roadmap')}
+                   >
+                       Roadmap
+                   </button>
+                   <button
+                       className={`text-left text-lg py-2 px-3 rounded-lg transition duration-200 ${activeTab === 'weeklyActions' ? 'bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900 dark:text-blue-200' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'}`} // Dark mode
+                       onClick={() => handleTabClick('weeklyActions')}
+                   >
+                       Weekly Actions
+                   </button>
+                    <button
+                       className={`text-left text-lg py-2 px-3 rounded-lg transition duration-200 ${activeTab === 'dailyHabits' ? 'bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900 dark:text-blue-200' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'}`} // Dark mode
+                       onClick={() => handleTabClick('dailyHabits')}
+                   >
+                       Daily Habits
+                   </button>
+                    <button
+                       className={`text-left text-lg py-2 px-3 rounded-lg transition duration-200 ${activeTab === 'skillLog' ? 'bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900 dark:text-blue-200' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'}`} // Dark mode
+                       onClick={() => handleTabClick('skillLog')}
+                   >
+                       Skill Hours Log
+                   </button>
+                    <button
+                       className={`text-left text-lg py-2 px-3 rounded-lg transition duration-200 ${activeTab === 'brandFeed' ? 'bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900 dark:text-blue-200' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'}`} // Dark mode
+                       onClick={() => handleTabClick('brandFeed')}
+                   >
+                       Personal Brand Feed
+                   </button>
+                    <button
+                       className={`text-left text-lg py-2 px-3 rounded-lg transition duration-200 ${activeTab === 'mvpTestLauncher' ? 'bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900 dark:text-blue-200' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'}`} // Dark mode
+                       onClick={() => handleTabClick('mvpTestLauncher')}
+                   >
+                       MVP Test Launcher
+                   </button>
+                    <button
+                       className={`text-left text-lg py-2 px-3 rounded-lg transition duration-200 ${activeTab === 'finance' ? 'bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900 dark:text-blue-200' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'}`} // Dark mode
+                       onClick={() => handleTabClick('finance')}
+                   >
+                       Finance
+                   </button>
+                   <button
+                       className="text-left text-lg py-2 px-3 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center dark:text-gray-300 dark:hover:bg-gray-700" // Dark mode
+                       onClick={handleSettingsClick}
+                   >
+                       <Settings size={20} className="mr-2"/> Settings
+                   </button>
+                   <button
+                       className="text-left text-lg py-2 px-3 rounded-lg text-red-600 hover:bg-red-100 transition duration-200 flex items-center dark:text-red-400 dark:hover:bg-red-900" // Dark mode
+                       onClick={logout}
+                   >
+                       <LogOut size={20} className="mr-2"/> Logout
+                   </button>
+              </nav>
+          </div>
+      )}
+
+
       <div className="container mx-auto">
         {/* Added ref to the nav container */}
-        <div ref={navRef} className="mb-6 border-b border-gray-200 overflow-x-auto overflow-y-hidden">
+        {/* Navigation Tabs (Hidden on small screens) */}
+        <div ref={navRef} className="hidden sm:block mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto overflow-y-hidden transition-colors duration-200"> {/* Added dark mode */}
           <nav className="-mb-px flex space-x-6 sm:space-x-8" aria-label="Tabs">
             <button
               // Added data-tab attribute to easily select the button
               data-tab="roadmap"
-              className={`${activeTab === 'roadmap' ? 'border-blue-600 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`}
+              className={`${activeTab === 'roadmap' ? 'border-blue-600 text-blue-700 font-bold dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`} // Dark mode
               onClick={() => setActiveTab('roadmap')}
             >
               <Target size={20} className="mr-2"/> Roadmap
@@ -2131,7 +2336,7 @@ const Dashboard = () => {
              <button
                // Added data-tab attribute
               data-tab="weeklyActions"
-              className={`${activeTab === 'weeklyActions' ? 'border-blue-600 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`}
+              className={`${activeTab === 'weeklyActions' ? 'border-blue-600 text-blue-700 font-bold dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`} // Dark mode
               onClick={() => setActiveTab('weeklyActions')}
             >
               <CalendarDays size={20} className="mr-2"/> Weekly Actions
@@ -2139,7 +2344,7 @@ const Dashboard = () => {
              <button
                // Added data-tab attribute
               data-tab="dailyHabits"
-              className={`${activeTab === 'dailyHabits' ? 'border-blue-600 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`}
+              className={`${activeTab === 'dailyHabits' ? 'border-blue-600 text-blue-700 font-bold dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`} // Dark mode
               onClick={() => setActiveTab('dailyHabits')}
             >
               <ListTodo size={20} className="mr-2"/> Daily Habits
@@ -2147,7 +2352,7 @@ const Dashboard = () => {
              <button
                // Added data-tab attribute
               data-tab="skillLog"
-              className={`${activeTab === 'skillLog' ? 'border-blue-600 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`}
+              className={`${activeTab === 'skillLog' ? 'border-blue-600 text-blue-700 font-bold dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`} // Dark mode
               onClick={() => setActiveTab('skillLog')}
             >
               <Clock size={20} className="mr-2"/> Skill Hours Log
@@ -2155,7 +2360,7 @@ const Dashboard = () => {
              <button
                // Added data-tab attribute
               data-tab="brandFeed"
-              className={`${activeTab === 'brandFeed' ? 'border-blue-600 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`}
+              className={`${activeTab === 'brandFeed' ? 'border-blue-600 text-blue-700 font-bold dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`} // Dark mode
               onClick={() => setActiveTab('brandFeed')}
             >
               <Feather size={20} className="mr-2"/> Personal Brand Feed
@@ -2163,7 +2368,7 @@ const Dashboard = () => {
              <button
                // Added data-tab attribute
               data-tab="mvpTestLauncher"
-              className={`${activeTab === 'mvpTestLauncher' ? 'border-blue-600 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`}
+              className={`${activeTab === 'mvpTestLauncher' ? 'border-blue-600 text-blue-700 font-bold dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`} // Dark mode
               onClick={() => setActiveTab('mvpTestLauncher')}
             >
               MVP Test Launcher
@@ -2171,7 +2376,7 @@ const Dashboard = () => {
              <button
                // Added data-tab attribute
               data-tab="finance"
-              className={`${activeTab === 'finance' ? 'border-blue-600 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`}
+              className={`${activeTab === 'finance' ? 'border-blue-600 text-blue-700 font-bold dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`} // Dark mode
               onClick={() => setActiveTab('finance')}
             >
               <DollarSign size={20} className="mr-2"/> Finance
@@ -2187,6 +2392,70 @@ const Dashboard = () => {
 
 
 const App = () => {
+    // State to hold the current theme
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system');
+
+    // Effect to apply the theme class to the root html element
+    useEffect(() => {
+        const applyThemeClass = (selectedTheme) => {
+            const root = document.documentElement;
+            // Remove existing theme classes
+            root.classList.remove('light', 'dark');
+
+            if (selectedTheme === 'system') {
+                // Apply dark class if system prefers dark
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    root.classList.add('dark');
+                } else {
+                    // Apply light class if system prefers light
+                    root.classList.add('light');
+                }
+            } else {
+                // Apply the selected theme class directly
+                root.classList.add(selectedTheme);
+            }
+        };
+
+        // Apply theme on initial load
+        applyThemeClass(theme);
+
+        // Save the selected theme to localStorage
+        localStorage.setItem('theme', theme);
+
+        // Listen for system theme changes if theme is set to 'system'
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleSystemThemeChange = () => {
+            if (theme === 'system') {
+                applyThemeClass('system');
+            }
+        };
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+
+        // Cleanup listener on component unmount
+        return () => {
+            mediaQuery.removeEventListener('change', handleSystemThemeChange);
+        };
+
+    }, [theme]); // Re-run effect when theme changes
+
+    // This effect runs once on mount to listen for theme changes from the SettingsComponent
+    // and update the local state and apply the class.
+    // This is important for changes made in another tab/window if localStorage is shared.
+    useEffect(() => {
+        const handleStorageChange = (event) => {
+            if (event.key === 'theme') {
+                const storedTheme = event.newValue || 'system';
+                setTheme(storedTheme);
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
+
 
   return (
     <AuthProvider>
@@ -2197,7 +2466,6 @@ const App = () => {
           {`
           body {
             font-family: 'Inter', sans-serif;
-            background-color: #f9fafb; /* Even lighter background */
           }
           .rounded-lg {
             border-radius: 0.5rem;
@@ -2223,6 +2491,50 @@ const App = () => {
               -ms-overflow-style: none;  /* IE and Edge */
               scrollbar-width: none;  /* Firefox */
           }
+
+          /* Dark Mode Styles */
+          .dark .bg-gray-50 { background-color: #1f2937; } /* Darker background */
+          .dark .bg-white { background-color: #111827; } /* Even darker white */
+          .dark .text-gray-900 { color: #f3f4f6; } /* Light text */
+          .dark .text-gray-800 { color: #e5e7eb; } /* Lighter text */
+          .dark .text-gray-700 { color: #d1d5db; } /* Even lighter text */
+          .dark .text-gray-600 { color: #9ca3af; } /* Still visible text */
+          .dark .border-gray-200 { border-color: #374151; } /* Darker borders */
+          .dark .border-gray-300 { border-color: #4b5563; } /* Darker borders */
+          .dark .border-gray-500 { border-color: #6b7280; } /* Darker borders */
+          .dark .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); } /* Keep some shadow */
+          .dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+          .dark .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+
+          /* Dark mode for specific components */
+          .dark .bg-blue-50 { background-color: #1e3a8a; } /* Darker blue background */
+          .dark .border-blue-200 { border-color: #3b82f6; } /* Blue border */
+          .dark .text-blue-800 { color: #93c5fd; } /* Lighter blue text */
+          .dark .text-blue-700 { color: #60a5fa; } /* Lighter blue text */
+          .dark .bg-blue-100 { background-color: #1d4ed8; } /* Darker blue background */
+          .dark .border-blue-300 { border-color: #60a5fa; } /* Blue border */
+          .dark .text-blue-900 { color: #bfdbfe; } /* Very light blue text */
+
+           .dark .bg-gray-50 { background-color: #1f2937; } /* Darker background */
+           .dark .border-gray-200 { border-color: #374151; } /* Darker border */
+           .dark .bg-white { background-color: #111827; } /* Darker white */
+           .dark .text-gray-800 { color: #e5e7eb; } /* Lighter text */
+           .dark .text-gray-500 { color: #6b7280; } /* Darker strikethrough text */
+
+           .dark .text-emerald-600 { color: #34d399; } /* Lighter green for income */
+           .dark .text-red-600 { color: #f87171; } /* Lighter red for expense */
+
+           /* Dark mode for light grey buttons (Edit, Manage Skills, Cancel, Close Settings, Inactive Theme Buttons) */
+           /* Increased contrast for these buttons */
+           .dark .bg-gray-200.text-gray-800 {
+               background-color: #4b5563; /* Darker gray background */
+               color: #e5e7eb; /* Lighter text color */
+           }
+           .dark .bg-gray-200.text-gray-800:hover {
+               background-color: #6b7280; /* Even darker gray on hover */
+           }
+
+
           `}
         </style>
 
