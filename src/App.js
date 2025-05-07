@@ -9,6 +9,7 @@ import {
   sendSignInLinkToEmail, // Import sendSignInLinkToEmail
   isSignInWithEmailLink, // Import isSignInWithEmailLink
   signInWithEmailLink, // Import signInWithEmailLink
+  sendPasswordResetEmail, // Import sendPasswordResetEmail
 } from 'firebase/auth';
 import {
   getFirestore,
@@ -26,7 +27,11 @@ import {
 } from 'firebase/firestore';
 
 // Import Lucide Icons
-import { Plus, Edit, Trash2, Save, Check, X, DollarSign, Clock, Target, Feather, Briefcase, CalendarDays, ListTodo, BarChart2, LogOut, Settings, Mail } from 'lucide-react'; // Import Mail icon
+import { Plus, Edit, Trash2, Save, Check, X, DollarSign, Clock, Target, Feather, Briefcase, CalendarDays, ListTodo, BarChart2, LogOut, Settings, Mail, Lock, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react'; // Added Chevron icons
+
+// Import React Markdown for rendering suggestions
+// You need to install this library: npm install react-markdown or yarn add react-markdown
+import ReactMarkdown from 'react-markdown';
 
 
 const firebaseConfig = {
@@ -104,10 +109,13 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordlessEmail, setPasswordlessEmail] = useState(''); // State for passwordless email
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState(''); // State for forgot password email
   const [error, setError] = useState('');
   const [infoMessage, setInfoMessage] = useState(''); // State for info messages
   const [emailLinkSent, setEmailLinkSent] = useState(false); // State to track if email link is sent
   const [showPasswordless, setShowPasswordless] = useState(false); // State to toggle passwordless section visibility
+  const [showForgotPassword, setShowForgotPassword] = useState(false); // State to toggle forgot password section visibility
+
 
   const { signup, login } = useAuth();
 
@@ -153,6 +161,24 @@ const Auth = () => {
     }
   };
 
+   // Handle sending password reset email
+   const handleSendPasswordReset = async () => {
+       if (forgotPasswordEmail.trim() === '') {
+           setError('Please enter your email address.');
+           return;
+       }
+       setError('');
+       setInfoMessage('');
+       try {
+           await sendPasswordResetEmail(auth, forgotPasswordEmail);
+           setInfoMessage(`Password reset email sent to ${forgotPasswordEmail}. Check your inbox!`);
+           setForgotPasswordEmail(''); // Clear the input after sending
+       } catch (err) {
+           setError(err.message);
+       }
+   };
+
+
   // Effect to handle sign-in with email link on page load
   useEffect(() => {
     // Check if the current URL is a sign-in with email link
@@ -194,61 +220,72 @@ const Auth = () => {
         {infoMessage && <p className="text-blue-600 text-sm mb-4 text-center">{infoMessage}</p>}
 
         {/* Email/Password Section */}
-        {!emailLinkSent && !showPasswordless && ( // Hide email/password if email link is sent or passwordless is shown
+        {!emailLinkSent && !showPasswordless && !showForgotPassword && ( // Hide if email link sent, passwordless shown, or forgot password shown
             <>
                 <form onSubmit={handleSubmit}>
-                <div className="mb-4"> {/* Adjusted margin */}
-                    <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
-                    Email
-                    </label>
-                    <input
-                    className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" // Adjusted padding
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    />
-                </div>
-                {/* Password input is now always shown in this section */}
-                <div className="mb-6">
-                    <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
-                    Password
-                    </label>
-                    <input
-                    className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" // Adjusted padding
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    />
-                </div>
-                <div className="flex flex-col items-center justify-center gap-3 mb-6"> {/* Adjusted gap */}
-                    <button
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 transform hover:scale-105" // Adjusted padding
-                    type="submit"
-                    >
-                    {isLogin ? 'Login with Password' : 'Sign Up with Password'}
-                    </button>
-                    <button
-                    className="inline-block align-baseline font-semibold text-sm text-blue-600 hover:text-blue-800 transition duration-200"
-                    type="button"
-                    onClick={() => setIsLogin(!isLogin)}
-                    >
-                    {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}
-                    </button>
-                </div>
+                    <div className="mb-4"> {/* Adjusted margin */}
+                        <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
+                        Email
+                        </label>
+                        <input
+                        className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" // Adjusted padding
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        />
+                    </div>
+                    {/* Password input is now always shown in this section */}
+                    <div className="mb-6">
+                        <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
+                        Password
+                        </label>
+                        <input
+                        className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" // Adjusted padding
+                        id="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        />
+                    </div>
+                    <div className="flex flex-col items-center justify-center gap-3 mb-6"> {/* Adjusted gap */}
+                        <button
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 transform hover:scale-105" // Adjusted padding
+                        type="submit"
+                        >
+                        {isLogin ? 'Login with Password' : 'Sign Up with Password'}
+                        </button>
+                        <button
+                        className="inline-block align-baseline font-semibold text-sm text-blue-600 hover:text-blue-800 transition duration-200"
+                        type="button"
+                        onClick={() => setIsLogin(!isLogin)}
+                        >
+                        {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}
+                        </button>
+                    </div>
                 </form>
 
-                {/* Option to show passwordless login */}
+                 {/* Forgot Password Link */}
                 <div className="text-center mt-4">
                     <button
                         className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200"
                         type="button"
-                        onClick={() => setShowPasswordless(true)}
+                        onClick={() => { setShowForgotPassword(true); setError(''); setInfoMessage(''); }} // Show forgot password form
+                    >
+                        Forgot Password?
+                    </button>
+                </div>
+
+                {/* Option to show passwordless login */}
+                <div className="text-center mt-2"> {/* Adjusted margin */}
+                    <button
+                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200"
+                        type="button"
+                        onClick={() => { setShowPasswordless(true); setError(''); setInfoMessage(''); }} // Show passwordless form
                     >
                         Prefer passwordless login?
                     </button>
@@ -258,7 +295,7 @@ const Auth = () => {
 
 
         {/* Passwordless Sign-in Section */}
-         {!emailLinkSent && showPasswordless && ( // Only show passwordless option if email link is not sent and showPasswordless is true
+         {!emailLinkSent && showPasswordless && !showForgotPassword && ( // Only show passwordless option if email link is not sent and showPasswordless is true, and forgot password is not shown
              <div className="mt-6">
                  <h3 className="text-xl font-semibold mb-4 text-gray-800 text-center">Login with Email Link</h3>
                  <div className="mb-4">
@@ -285,13 +322,51 @@ const Auth = () => {
                     <button
                         className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200"
                         type="button"
-                        onClick={() => setShowPasswordless(false)}
+                        onClick={() => { setShowPasswordless(false); setError(''); setInfoMessage(''); }} // Hide passwordless form
                     >
                         Back to password login
                     </button>
                 </div>
              </div>
          )}
+
+        {/* Forgot Password Section */}
+        {!emailLinkSent && showForgotPassword && !showPasswordless && ( // Only show if email link not sent, forgot password is true, and passwordless is not shown
+            <div className="mt-6">
+                <h3 className="text-xl font-semibold mb-4 text-gray-800 text-center">Forgot Password</h3>
+                <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="forgotPasswordEmail">
+                        Email Address
+                    </label>
+                    <input
+                        className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        id="forgotPasswordEmail"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={forgotPasswordEmail}
+                        onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                        required
+                    />
+                </div>
+                <button
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                    onClick={handleSendPasswordReset}
+                >
+                    <Lock size={20} className="mr-2"/> Send Reset Link
+                </button>
+                 {/* Option to go back to login */}
+                <div className="text-center mt-4">
+                    <button
+                        className="inline-block align-baseline font-semibold text-sm text-gray-600 hover:text-gray-800 transition duration-200"
+                        type="button"
+                        onClick={() => { setShowForgotPassword(false); setError(''); setInfoMessage(''); }} // Hide forgot password form
+                    >
+                        Back to login
+                    </button>
+                </div>
+            </div>
+        )}
+
 
          {/* Show message when email link is sent */}
          {emailLinkSent && (
@@ -312,6 +387,9 @@ const Roadmap = () => {
   const [newItem, setNewItem] = useState('');
   const [editingItem, setEditingItem] = useState(null);
   const [editText, setEditText] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
+  const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
+
 
   useEffect(() => {
     const fetchRoadmap = async () => {
@@ -333,6 +411,7 @@ const Roadmap = () => {
       text: newItem.trim(),
       userId: currentUser.uid,
       createdAt: serverTimestamp(),
+      completed: false, // Added completed status
     });
     setNewItem('');
     const q = query(collection(db, 'roadmap'), where('userId', '==', currentUser.uid), orderBy('createdAt', 'asc'));
@@ -352,6 +431,15 @@ const Roadmap = () => {
     setRoadmapItems(querySnapshot.docs.map(doc => { return { id: doc.id, ...doc.data() }; }));
   };
 
+   const toggleComplete = async (item) => {
+       if (!currentUser) return;
+       console.log("Attempting to toggle complete roadmap item with user ID:", currentUser.uid);
+       const itemRef = doc(db, 'roadmap', item.id);
+       await updateDoc(itemRef, { completed: !item.completed });
+       setRoadmapItems(roadmapItems.map(i => i.id === item.id ? { ...i, completed: !i.completed } : i));
+   };
+
+
   const deleteItem = async (id) => {
     if (!currentUser) return;
     console.log("Attempting to delete roadmap item with user ID:", currentUser.uid);
@@ -359,9 +447,73 @@ const Roadmap = () => {
     setRoadmapItems(roadmapItems.filter(item => item.id !== id));
   };
 
+  // Static Smart Suggestions Functionality
+  const generateRoadmapSuggestions = () => {
+      const totalGoals = roadmapItems.length;
+      const completedGoals = roadmapItems.filter(item => item.completed).length;
+      const incompleteGoals = totalGoals - completedGoals;
+      const oldestIncomplete = roadmapItems.filter(item => !item.completed).sort((a, b) => a.createdAt?.toDate() - b.createdAt?.toDate())[0];
+
+
+      let suggestions = `**Roadmap Summary:**\n\n`;
+      suggestions += `- You have **${totalGoals}** goals listed.\n`;
+      suggestions += `- **${completedGoals}** goals are completed.\n`;
+      suggestions += `- **${incompleteGoals}** goals are still in progress.\n\n`;
+
+      suggestions += `**Suggestions:**\n`;
+      if (incompleteGoals > 0) {
+          if (incompleteGoals > 5) {
+              suggestions += `- Consider prioritizing your top 3-5 most important goals to focus your energy.\n`;
+          }
+          if (oldestIncomplete) {
+               suggestions += `- Your oldest incomplete goal is: "${oldestIncomplete.text}". Consider reviewing or breaking it down.\n`;
+          } else if (incompleteGoals > 0) {
+               suggestions += `- Review your incomplete goals. Are they still relevant? Can you break them into smaller steps?\n`;
+          }
+          suggestions += `- Link your incomplete roadmap goals to specific weekly actions to ensure progress.\n`;
+      } else {
+          suggestions += `- Great job completing all your goals! Consider adding new aspirations to your roadmap to keep growing.\n`;
+          suggestions += `- Reflect on what strategies helped you achieve your goals and apply those to future plans.\n`;
+      }
+       if (totalGoals === 0) {
+           suggestions = `**Roadmap Summary:**\n\n- You haven't added any goals yet.\n\n**Suggestions:**\n- Start by adding your long-term aspirations to the roadmap.\n- Think about what you want to achieve in the next 1, 5, or 10 years.\n`;
+       }
+
+
+      setSuggestionsText(suggestions);
+      setShowSuggestions(true); // Always show suggestions after generating
+      console.log("Generating static roadmap suggestions...");
+  };
+
+
   return (
     <div id="roadmap" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
       <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><Target className="mr-3 text-blue-600" size={28} /> Roadmap</h3>
+
+      {/* Smart Goal Suggestions Section */}
+       <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+           <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Goal Suggestions</h4> {/* Updated heading and icon */}
+           <p className="text-blue-700 text-sm mb-3">Get smart analysis and suggestions to help you define and achieve your long-term goals more effectively.</p> {/* Updated description */}
+           <button
+               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+               onClick={generateRoadmapSuggestions} // Call the static suggestion function
+           >
+               {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
+           </button>
+            {showSuggestions && (
+                <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                    <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                     <button
+                        className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                        onClick={() => setShowSuggestions(false)} // Hide suggestions
+                    >
+                        Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                    </button>
+                </div>
+            )}
+       </div>
+
+
       <div className="mb-6 flex flex-col sm:flex-row gap-3">
         <input
           type="text"
@@ -388,15 +540,21 @@ const Roadmap = () => {
                 onChange={(e) => setEditText(e.target.value)}
               />
             ) : (
-              <span className="flex-grow text-gray-800 text-lg mr-2 mb-2 sm:mb-0">{item.text}</span>
+              <span className={`flex-grow text-gray-800 text-lg mr-2 mb-2 sm:mb-0 ${item.completed ? 'line-through text-gray-500' : ''}`}>{item.text}</span>
             )}
             <div className="flex gap-2 flex-shrink-0">
+                 <button
+                    className={`text-sm py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 flex items-center justify-center ${item.completed ? 'bg-gray-500 hover:bg-gray-600 text-white' : 'bg-gray-800 hover:bg-gray-700 text-white'}`} // Minimal button style
+                    onClick={() => toggleComplete(item)}
+                    >
+                     {item.completed ? <X size={16} className="mr-1 sm:mr-1"/> : <Check size={16} className="mr-1 sm:mr-1"/>} <span className="hidden sm:inline">{item.completed ? 'Undo' : 'Complete'}</span> {/* Hide text on small screens */}
+                </button>
               {editingItem === item.id ? (
                 <button
                   className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                   onClick={() => updateItem(item.id)}
                 >
-                  <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                  <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                 </button>
               ) : (
                 <button
@@ -426,6 +584,9 @@ const WeeklyActions = () => {
     const [newAction, setNewAction] = useState('');
     const [editingAction, setEditingAction] = useState(null);
     const [editText, setEditText] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
+    const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
+
 
     useEffect(() => {
         const fetchActions = async () => {
@@ -483,9 +644,70 @@ const WeeklyActions = () => {
         setActions(actions.filter(action => action.id !== id));
     };
 
+     // Static Smart Suggestions Functionality
+    const generateActionSuggestions = () => {
+        const totalActions = actions.length;
+        const completedActions = actions.filter(action => action.completed).length;
+        const incompleteActions = totalActions - completedActions;
+
+        let suggestions = `**Weekly Actions Summary:**\n\n`;
+        suggestions += `- You have **${totalActions}** weekly actions listed.\n`;
+        suggestions += `- **${completedActions}** actions are completed.\n`;
+        suggestions += `- **${incompleteActions}** actions are still in progress.\n\n`;
+
+        suggestions += `**Suggestions:**\n`;
+        if (incompleteActions > 0) {
+             if (incompleteActions > 3) {
+                 suggestions += `- Focus on completing your top 3 most important actions this week.\n`;
+             }
+            const incompleteList = actions.filter(action => !action.completed).map(action => `- "${action.text}"`).join('\n');
+            if (incompleteList) {
+                 suggestions += `Missed Actions:\n${incompleteList}\n`; // Changed from "Review these incomplete actions"
+                 suggestions += `-- Can any be broken down or rescheduled?\n`;
+            }
+            suggestions += `- Ensure your weekly actions are aligned with your long-term roadmap goals.\n`;
+        } else {
+             suggestions += `- All weekly actions completed! Excellent progress.\n`;
+             suggestions += `- Plan your actions for the upcoming week based on your roadmap and daily habits.\n`;
+        }
+         if (totalActions === 0) {
+            suggestions = `**Weekly Actions Summary:**\n\n- You haven't added any weekly actions yet.\n\n**Suggestions:**\n- Break down your roadmap goals into smaller, actionable steps for this week.\n- What specific tasks will move you closer to your goals this week?\n`;
+        }
+
+        setSuggestionsText(suggestions);
+        setShowSuggestions(true); // Always show suggestions after generating
+        console.log("Generating static action suggestions...");
+    };
+
+
     return (
         <div id="weeklyActions" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
             <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><CalendarDays className="mr-3 text-blue-600" size={28} /> Weekly Actions</h3>
+
+             {/* Smart Action Suggestions Section */}
+             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                 <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Action Suggestions</h4> {/* Updated heading and icon */}
+                 <p className="text-blue-700 text-sm mb-3">Get smart suggestions for your weekly tasks based on your goals and progress.</p> {/* Updated description */}
+                 <button
+                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     onClick={generateActionSuggestions} // Call the static suggestion function
+                 >
+                     {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
+                 </button>
+                 {showSuggestions && (
+                     <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                         <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                          <button
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                            onClick={() => setShowSuggestions(false)} // Hide suggestions
+                        >
+                            Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                        </button>
+                     </div>
+                 )}
+             </div>
+
+
             <div className="mb-6 flex flex-col sm:flex-row gap-3">
                 <input
                     type="text"
@@ -519,28 +741,28 @@ const WeeklyActions = () => {
                                 className={`text-sm py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 flex items-center justify-center ${action.completed ? 'bg-gray-500 hover:bg-gray-600 text-white' : 'bg-gray-800 hover:bg-gray-700 text-white'}`} // Minimal button style
                                 onClick={() => toggleComplete(action)}
                                 >
-                                 {action.completed ? <X size={16} className="mr-1"/> : <Check size={16} className="mr-1"/>} <span className="hidden sm:inline">{action.completed ? 'Undo' : 'Complete'}</span> {/* Hide text on small screens */}
+                                 {action.completed ? <X size={16} className="mr-1 sm:mr-1"/> : <Check size={16} className="mr-1 sm:mr-1"/>} <span className="hidden sm:inline">{action.completed ? 'Undo' : 'Complete'}</span> {/* Hide text on small screens */}
                             </button>
                             {editingAction === action.id ? (
                                 <button
                                     className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => updateAction(action.id)}
                                 >
-                                    <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                    <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                 </button>
                             ) : (
                                 <button
                                     className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => { setEditingAction(action.id); setEditText(action.text); }}
                                 >
-                                    <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                    <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                 </button>
                             )}
                             <button
                                 className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                 onClick={() => deleteAction(action.id)}
                               >
-                                <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                               </button>
                         </div>
                     </li>
@@ -556,6 +778,9 @@ const DailyHabits = () => {
     const [newHabit, setNewHabit] = useState('');
     const [editingHabit, setEditingHabit] = useState(null);
     const [editText, setEditText] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
+    const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
+
 
     useEffect(() => {
         const fetchHabits = async () => {
@@ -619,16 +844,33 @@ const DailyHabits = () => {
 
                  if (lastCompletedDate.getTime() === yesterday.getTime()) {
                      newStreak = (habit.streak || 0) + 1;
-                 } else if (lastCompletedDate.getTime() !== today.getTime()) {
+                 } else if (lastCompletedDate.getTime() !== today.getTime()) { // Completed today, but not yesterday (streak broken or first day)
                      newStreak = 1;
                  }
-            } else {
+                 // If lastCompletedDate is today, streak doesn't change (already counted)
+            } else { // First time completing this habit
                  newStreak = 1;
             }
             newLastCompletedAt = now;
-        } else {
-             newStreak = 0;
-             newLastCompletedAt = null;
+        } else { // Marking as incomplete today
+             // If the habit was completed today, and we unmark it, the streak is broken unless it was also completed yesterday
+             if (habit.lastCompletedAt) {
+                 const lastCompletedDate = new Date(habit.lastCompletedAt.toDate().getFullYear(), habit.lastCompletedAt.toDate().getMonth(), habit.lastCompletedAt.toDate().getDate());
+                 const yesterday = new Date(today);
+                 yesterday.setDate(today.getDate() - 1);
+
+                  // If the last completion was yesterday, unmarking today breaks the streak
+                 if (lastCompletedDate.getTime() === yesterday.getTime()) {
+                      newStreak = 0; // Streak broken
+                 }
+                 // If the last completion was today, unmarking it just resets completedToday and lastCompletedAt
+                 if (lastCompletedDate.getTime() === today.getTime()) {
+                      newLastCompletedAt = null;
+                 }
+             } else {
+                 newStreak = 0;
+             }
+             newCompletedToday = false; // Explicitly set to false
         }
 
 
@@ -663,23 +905,23 @@ const DailyHabits = () => {
                     const yesterday = new Date(today);
                     yesterday.setDate(today.getDate() - 1);
 
+                    // If last completed was before yesterday and streak > 0, reset streak
                     if (lastCompletedDate.getTime() < yesterday.getTime() && habit.streak > 0) {
                          const habitRef = doc(db, 'dailyHabits', habit.id);
                          updates.push(updateDoc(habitRef, { streak: 0, completedToday: false }));
                          console.log(`Resetting streak for habit ${habit.id}`);
-                    } else if (lastCompletedDate.getTime() < today.getTime() && habit.completedToday) {
+                    }
+                    // If last completed was before today and completedToday is true, reset completedToday
+                    else if (lastCompletedDate.getTime() < today.getTime() && habit.completedToday) {
                          const habitRef = doc(db, 'dailyHabits', habit.id);
                          updates.push(updateDoc(habitRef, { completedToday: false }));
                          console.log(`Resetting completedToday for habit ${habit.id}`);
                     }
-                } else if (habit.streak > 0) {
+                } else if (habit.streak > 0 || habit.completedToday) {
+                     // Handle cases where lastCompletedAt might be null but streak/completedToday is true (shouldn't happen with correct logic, but as a safeguard)
                      const habitRef = doc(db, 'dailyHabits', habit.id);
                      updates.push(updateDoc(habitRef, { streak: 0, completedToday: false }));
-                      console.log(`Resetting streak for habit ${habit.id} (no lastCompletedAt)`);
-                } else if (habit.completedToday) {
-                      const habitRef = doc(db, 'dailyHabits', habit.id);
-                      updates.push(updateDoc(habitRef, { completedToday: false }));
-                       console.log(`Resetting completedToday for habit ${habit.id} (no lastCompletedAt)`);
+                      console.log(`Resetting streak/completedToday for habit ${habit.id} (no lastCompletedAt)`);
                 }
             });
 
@@ -705,10 +947,73 @@ const DailyHabits = () => {
 
     }, [habits, currentUser]);
 
+     // Static Smart Suggestions Functionality
+    const generateHabitSuggestions = () => {
+        const totalHabits = habits.length;
+        const completedToday = habits.filter(habit => habit.completedToday).length;
+        const habitsWithStreaks = habits.filter(habit => habit.streak > 0).length;
+        const longestStreak = habits.reduce((max, habit) => Math.max(max, habit.streak || 0), 0);
+        const incompleteHabitsToday = habits.filter(habit => !habit.completedToday);
+
+
+        let suggestions = `**Daily Habits Summary:**\n\n`;
+        suggestions += `- You are tracking **${totalHabits}** daily habits.\n`;
+        suggestions += `- You completed **${completedToday}** habits today.\n`;
+        suggestions += `- **${habitsWithStreaks}** habits currently have a streak.\n`;
+        suggestions += `- Your longest current streak is **${longestStreak}** days.\n\n`;
+
+        suggestions += `**Suggestions:**\n`;
+        if (completedToday < totalHabits) {
+             suggestions += `- You missed ${incompleteHabitsToday.length} habit(s) today.\n`;
+             const missedList = incompleteHabitsToday.map(habit => `- "${habit.text}"`).join('\n');
+             if (missedList) {
+                  suggestions += `Missed Habits:\n${missedList}\n`;
+             }
+             suggestions += `-- Try to complete all your habits tomorrow for a perfect day!\n`;
+             suggestions += `- Identify potential blockers for the habits you missed today.\n`;
+        } else {
+             suggestions += `- Excellent job completing all your habits today! Keep the momentum going.\n`;
+             suggestions += `- Consider adding a new habit to challenge yourself.\n`;
+        }
+         if (totalHabits === 0) {
+            suggestions = `**Daily Habits Summary:**\n\n- You haven't added any daily habits yet.\n\n**Suggestions:**\n- What small actions can you do daily to support your weekly actions and roadmap goals?\n- Start with 1-2 simple habits to build consistency.\n`;
+        }
+
+
+        setSuggestionsText(suggestions);
+        setShowSuggestions(true); // Always show suggestions after generating
+        console.log("Generating static habit suggestions...");
+    };
+
 
     return (
         <div id="dailyHabits" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
             <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><ListTodo className="mr-3 text-blue-600" size={28} /> Daily Habits</h3>
+
+             {/* Smart Habit Insights Section */}
+             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                 <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Habit Insights</h4> {/* Updated heading and icon */}
+                 <p className="text-blue-700 text-sm mb-3">Get smart analysis and strategies to help you build and maintain consistent daily habits.</p> {/* Updated description */}
+                 <button
+                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     onClick={generateHabitSuggestions} // Call the static suggestion function
+                 >
+                     {showSuggestions ? 'Refresh Insights' : 'Get Insights'} {/* Change button text */}
+                 </button>
+                 {showSuggestions && (
+                     <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                         <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                          <button
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                            onClick={() => setShowSuggestions(false)} // Hide suggestions
+                        >
+                            Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                        </button>
+                     </div>
+                 )}
+             </div>
+
+
             <div className="mb-6 flex flex-col sm:flex-row gap-3">
                 <input
                     type="text"
@@ -744,28 +1049,28 @@ const DailyHabits = () => {
                                 className={`text-sm py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 flex items-center justify-center ${habit.completedToday ? 'bg-gray-500 hover:bg-gray-600 text-white' : 'bg-gray-800 hover:bg-gray-700 text-white'}`} // Minimal button style
                                 onClick={() => toggleCompleteToday(habit)}
                                 >
-                                {habit.completedToday ? <X size={16} className="mr-1"/> : <Check size={16} className="mr-1"/>} <span className="hidden sm:inline">{habit.completedToday ? 'Undo' : 'Done Today'}</span> {/* Hide text on small screens */}
+                                {habit.completedToday ? <X size={16} className="mr-1 sm:mr-1"/> : <Check size={16} className="mr-1 sm:mr-1"/>} <span className="hidden sm:inline">{habit.completedToday ? 'Undo' : 'Done Today'}</span> {/* Hide text on small screens */}
                             </button>
                             {editingHabit === habit.id ? (
                                 <button
                                     className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => updateHabit(habit.id)}
                                 >
-                                    <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                    <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                 </button>
                             ) : (
                                 <button
                                     className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => { setEditingHabit(habit.id); setEditText(habit.text); }}
                                 >
-                                    <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                    <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                 </button>
                             )}
                             <button
                                 className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                 onClick={() => deleteHabit(habit.id)}
                               >
-                                <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                               </button>
                         </div>
                     </li>
@@ -789,6 +1094,8 @@ const SkillHoursLog = () => {
     const [showManageSkills, setShowManageSkills] = useState(false); // State for Manage Skills Section
     const [editingSkill, setEditingSkill] = useState(null); // State for editing a skill name
     const [editSkillName, setEditSkillName] = useState(''); // State for editing skill name input
+    const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
+    const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
 
 
     useEffect(() => {
@@ -969,10 +1276,83 @@ const SkillHoursLog = () => {
         return acc;
     }, {});
 
+     // Static Smart Suggestions Functionality
+    const generateSkillSuggestions = () => {
+        const skillsLogged = Object.keys(totalTimePerSkill).length;
+        const totalHoursLogged = Object.values(totalTimePerSkill).reduce((sum, hours) => sum + hours, 0);
+
+        let suggestions = `**Skill Hours Summary:**\n\n`;
+        suggestions += `- You are currently tracking **${skillsLogged}** skills.\n`;
+        suggestions += `- You have logged a total of **${totalHoursLogged.toFixed(1)}** hours across all skills.\n\n`;
+
+        suggestions += `**Suggestions:**\n`;
+        if (skillsLogged > 0) {
+            // Find the skill with the most hours
+            const mostPracticedSkill = Object.entries(totalTimePerSkill).reduce((most, [skill, hours]) => {
+                return hours > most.hours ? { skill, hours } : most;
+            }, { skill: 'N/A', hours: -1 });
+            if (mostPracticedSkill.skill !== 'N/A') {
+                 suggestions += `- Your most practiced skill is "**${mostPracticedSkill.skill}**" with **${mostPracticedSkill.hours.toFixed(1)}** hours.\n`;
+            }
+
+            // Find skills with less than a certain number of hours (e.g., 10 hours)
+            const lessPracticedSkills = Object.entries(totalTimePerSkill).filter(([skill, hours]) => hours < 10);
+            if (lessPracticedSkills.length > 0) {
+                 suggestions += `- Consider dedicating more time to less practiced skills like ${lessPracticedSkills.map(([skill, hours]) => `"${skill}" (${hours.toFixed(1)} hrs)`).join(', ')}.\n`;
+            }
+
+             // Find skills with no recent logs (e.g., last 30 days) - Requires filtering logs by timestamp
+             const thirtyDaysAgo = Timestamp.now().toDate();
+             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+             const recentLogs = logs.filter(log => log.timestamp?.toDate() >= thirtyDaysAgo);
+             const recentSkills = new Set(recentLogs.map(log => log.skill));
+             const inactiveSkills = skills.filter(skill => !recentSkills.has(skill.skillName));
+
+             if (inactiveSkills.length > 0) {
+                  suggestions += `- You haven't logged hours for skills like ${inactiveSkills.map(skill => `"${skill.skillName}"`).join(', ')} recently. Try to incorporate them back into your practice.\n`;
+             }
+
+
+             suggestions += `- Review your roadmap goals and ensure your logged skills align with the skills you need to develop.\n`;
+        } else {
+            suggestions += `- You haven't logged any skill hours yet. Add some skills and start tracking your progress!\n`;
+            suggestions += `- Think about the skills you need to develop to achieve your roadmap goals and add them here.\n`;
+        }
+
+
+        setSuggestionsText(suggestions);
+        setShowSuggestions(true); // Always show suggestions after generating
+        console.log("Generating static skill suggestions...");
+    };
+
 
     return (
         <div id="skillLog" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
             <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><Clock className="mr-3 text-blue-600" size={28} /> Skill Hours Log</h3>
+
+             {/* Smart Skill Development Suggestions Section */}
+             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                 <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Skill Suggestions</h4> {/* Updated heading and icon */}
+                 <p className="text-blue-700 text-sm mb-3">Get smart suggestions for skill development based on your goals and logged hours.</p> {/* Updated description */}
+                 <button
+                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     onClick={generateSkillSuggestions} // Call the static suggestion function
+                 >
+                     {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
+                 </button>
+                 {showSuggestions && (
+                     <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                         <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                          <button
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                            onClick={() => setShowSuggestions(false)} // Hide suggestions
+                        >
+                            Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                        </button>
+                     </div>
+                 )}
+             </div>
+
 
              {/* Action Buttons */}
             <div className="mb-6 flex flex-wrap gap-4">
@@ -1050,21 +1430,21 @@ const SkillHoursLog = () => {
                                             className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                             onClick={() => updateSkillName(skill.id)}
                                         >
-                                            <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                            <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                         </button>
                                     ) : (
                                         <button
                                             className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                             onClick={() => { setEditingSkill(skill.id); setEditSkillName(skill.skillName); }}
                                         >
-                                            <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                            <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                         </button>
                                     )}
                                      <button
                                         className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                         onClick={() => deleteSkill(skill.id)}
                                     >
-                                        <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                        <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                                     </button>
                                 </div>
                             </li>
@@ -1174,21 +1554,21 @@ const SkillHoursLog = () => {
                                         className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                         onClick={() => updateLog(log.id)}
                                     >
-                                        <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                        <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                     </button>
                                 ) : (
                                     <button
                                         className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                         onClick={() => { setEditingLog(log.id); setEditSkillLogSkill(log.skill); setEditSkillLogHours(log.hours.toString()); }}
                                     >
-                                        <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                        <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                     </button>
                                 )}
                                 <button
                                     className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                     onClick={() => deleteLog(log.id)}
                                 >
-                                    <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                    <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                                 </button>
                             </div>
                         </li>
@@ -1206,6 +1586,9 @@ const PersonalBrandFeed = () => {
     const [newItem, setNewItem] = useState('');
     const [editingItem, setEditingItem] = useState(null);
     const [editText, setEditText] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
+    const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
+
 
     useEffect(() => {
         const fetchFeed = async () => {
@@ -1252,9 +1635,65 @@ const PersonalBrandFeed = () => {
         await deleteDoc(doc(db, 'brandFeed', id));
         setFeedItems(feedItems.filter(item => item.id !== id));
     };
+
+     // Static Smart Suggestions Functionality
+    const generateContentSuggestions = () => {
+        const totalItems = feedItems.length;
+        const latestItem = feedItems.length > 0 ? feedItems[0] : null;
+
+
+        let suggestions = `**Personal Brand Feed Summary:**\n\n`;
+        suggestions += `- You have **${totalItems}** entries in your feed.\n`;
+        if (latestItem) {
+             suggestions += `- Your most recent entry is: "${latestItem.text}" (added ${latestItem.createdAt?.toDate().toLocaleDateString()}).\n\n`;
+        } else {
+             suggestions += `- Your personal brand feed is currently empty.\n\n`;
+        }
+
+
+        suggestions += `**Suggestions:**\n`;
+        if (totalItems > 0) {
+            suggestions += `- Review your recent entries and identify common themes or topics you can expand on.\n`;
+            suggestions += `- Consider sharing your progress on a specific skill or roadmap goal in your feed.\n`;
+            suggestions += `- Think about what kind of content would be valuable to your professional network.\n`;
+        } else {
+            suggestions += `- Use this space to track ideas for social media posts, articles, or networking topics.\n`;
+            suggestions += `- Start by adding a note about a recent accomplishment or a topic you're learning about.\n`;
+        }
+
+        setSuggestionsText(suggestions);
+        setShowSuggestions(true); // Always show suggestions after generating
+        console.log("Generating static content suggestions...");
+    };
+
+
     return (
         <div id="brandFeed" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
             <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><Feather className="mr-3 text-blue-600" size={28} /> Personal Brand Feed</h3>
+
+             {/* Smart Content Suggestions Section */}
+             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                 <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Content Suggestions</h4> {/* Updated heading and icon */}
+                 <p className="text-blue-700 text-sm mb-3">Get smart content ideas and suggestions to help you build your personal brand.</p> {/* Updated description */}
+                 <button
+                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     onClick={generateContentSuggestions} // Call the static suggestion function
+                 >
+                     {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
+                 </button>
+                 {showSuggestions && (
+                     <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                         <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                          <button
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                            onClick={() => setShowSuggestions(false)} // Hide suggestions
+                        >
+                            Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                        </button>
+                     </div>
+                 )}
+             </div>
+
             <div className="mb-6 flex flex-col sm:flex-row gap-3">
                 <input
                     type="text"
@@ -1289,21 +1728,21 @@ const PersonalBrandFeed = () => {
                                     className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => updateItem(item.id)}
                                 >
-                                    <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                    <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                 </button>
                             ) : (
                                 <button
                                     className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                     onClick={() => { setEditingItem(item.id); setEditText(item.text); }}
                                 >
-                                    <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                    <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                 </button>
                             )}
                             <button
                                 className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                 onClick={() => deleteItem(item.id)}
                               >
-                                <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                               </button>
                         </div>
                     </li>
@@ -1332,6 +1771,8 @@ const Finance = () => {
     const [editDescription, setEditDescription] = useState('');
     const [editAmount, setEditAmount] = useState('');
     const [editType, setEditType] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
+    const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
 
 
     useEffect(() => {
@@ -1400,10 +1841,80 @@ const Finance = () => {
     const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
     const netBalance = totalIncome - totalExpense;
 
+     // Static Smart Suggestions Functionality
+    const generateFinancialSuggestions = () => {
+        const totalTransactions = transactions.length;
+        const highestExpense = transactions.filter(t => t.type === 'expense').reduce((max, t) => Math.max(max, t.amount), 0);
+        const highestIncome = transactions.filter(t => t.type === 'income').reduce((max, t) => Math.max(max, t.amount), 0);
+
+
+        let suggestions = `**Financial Summary:**\n\n`;
+        suggestions += `- You have recorded **${totalTransactions}** transactions.\n`;
+        suggestions += `- Your total income is **$${totalIncome.toFixed(2)}**.\n`;
+        suggestions += `- Your total expense is **$${totalExpense.toFixed(2)}**.\n`;
+        suggestions += `- Your current net balance is **$${netBalance.toFixed(2)}**.\n\n`;
+
+        suggestions += `**Suggestions:**\n`;
+        if (netBalance < 0) {
+            suggestions += `- Your expenses currently exceed your income. Review your recent transactions to identify areas where you can reduce spending.\n`;
+            suggestions += `- Consider setting a budget for different expense categories.\n`;
+        } else if (netBalance > 0) {
+            suggestions += `- Your income exceeds your expenses. Consider setting a savings goal or investing.\n`;
+            suggestions += `- Review your income sources and explore ways to increase them.\n`;
+        } else {
+             suggestions += `- Your income and expenses are balanced. Ensure this aligns with your long-term financial goals.\n`;
+        }
+
+        if (highestExpense > 0) {
+             suggestions += `- Your highest single expense recorded is **$${highestExpense.toFixed(2)}**.\n`;
+        }
+         if (highestIncome > 0) {
+             suggestions += `- Your highest single income recorded is **$${highestIncome.toFixed(2)}**.\n`;
+        }
+
+        // Simple check for high expenses relative to income
+        if (totalIncome > 0 && totalExpense / totalIncome > 0.8) { // If expenses are more than 80% of income
+             suggestions += `- Your expenses are relatively high compared to your income. Look for opportunities to reduce spending or increase income.\n`;
+        }
+
+         if (totalTransactions === 0) {
+             suggestions = `**Financial Summary:**\n\n- You haven't added any financial transactions yet.\n\n**Suggestions:**\n- Start by logging your income and expenses to get a clear picture of your finances.\n- Tracking your spending is the first step to better financial management.\n`;
+         }
+
+
+        setSuggestionsText(suggestions);
+        setShowSuggestions(true); // Always show suggestions after generating
+        console.log("Generating static financial suggestions...");
+    };
+
 
     return (
         <div id="finance" className="p-6 bg-white rounded-xl shadow-md mb-6"> {/* Added ID */}
             <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center"><DollarSign className="mr-3 text-green-600" size={28} /> Income/Expense</h3>
+
+             {/* Smart Financial Insights Section */}
+             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                 <h4 className="text-lg font-semibold text-blue-800 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Financial Insights</h4> {/* Updated heading and icon */}
+                 <p className="text-blue-700 text-sm mb-3">Get smart insights and tips to help you manage your finances effectively.</p> {/* Updated description */}
+                 <button
+                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     onClick={generateFinancialSuggestions} // Call the static suggestion function
+                 >
+                     {showSuggestions ? 'Refresh Insights' : 'Get Insights'} {/* Change button text */}
+                 </button>
+                 {showSuggestions && (
+                     <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-300 text-blue-900 whitespace-pre-wrap">
+                         <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                          <button
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center"
+                            onClick={() => setShowSuggestions(false)} // Hide suggestions
+                        >
+                            Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                        </button>
+                     </div>
+                 )}
+             </div>
+
 
             <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
                 <h4 className="text-xl font-semibold mb-4 text-gray-800">Add Transaction</h4>
@@ -1495,7 +2006,7 @@ const Finance = () => {
                                         placeholder="Amount"
                                     />
                                      <select
-                                        className="shadow-sm appearance-none border border-gray-300 rounded-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-24 bg-white"
+                                        className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-24 bg-white"
                                         value={editType}
                                         onChange={(e) => setEditType(e.target.value)}
                                     >
@@ -1514,21 +2025,21 @@ const Finance = () => {
                                         className="bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                         onClick={() => updateTransaction(transaction.id)}
                                     >
-                                        <Save size={16} className="mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
+                                        <Save size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Save</span> {/* Hide text on small screens */}
                                     </button>
                                 ) : (
                                     <button
                                         className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Minimal button style
                                         onClick={() => { setEditingTransaction(transaction.id); setEditDescription(transaction.description); setEditAmount(transaction.amount.toString()); setEditType(transaction.type); }}
                                     >
-                                        <Edit size={16} className="mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
+                                        <Edit size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Edit</span> {/* Hide text on small screens */}
                                     </button>
                                 )}
                                 <button
                                     className="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center" // Destructive action color
                                     onClick={() => deleteTransaction(transaction.id)}
                                 >
-                                    <Trash2 size={16} className="mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
+                                    <Trash2 size={16} className="mr-1 sm:mr-1"/> <span className="hidden sm:inline">Delete</span> {/* Hide text on small screens */}
                                 </button>
                             </div>
                         </li>
