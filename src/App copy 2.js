@@ -27,7 +27,7 @@ import {
 } from 'firebase/firestore';
 
 // Import Lucide Icons
-import { Plus, Edit, Trash2, Save, Check, X, DollarSign, Clock, Target, Feather, Briefcase, CalendarDays, ListTodo, BarChart2, LogOut, Settings, Mail, Lock, Lightbulb, ChevronDown, ChevronUp, Menu, X as CloseIcon, Moon, Sun, Monitor, Loader2 } from 'lucide-react'; // Added Loader2 for loading indicator
+import { Plus, Edit, Trash2, Save, Check, X, DollarSign, Clock, Target, Feather, Briefcase, CalendarDays, ListTodo, BarChart2, LogOut, Settings, Mail, Lock, Lightbulb, ChevronDown, ChevronUp, Menu, X as CloseIcon, Moon, Sun, Monitor } from 'lucide-react'; // Added Menu, CloseIcon, Moon, Sun, Monitor
 
 
 // Import React Markdown for rendering suggestions
@@ -382,57 +382,6 @@ const Auth = () => {
   );
 };
 
-// Placeholder for Groq API Key - REPLACE WITH YOUR ACTUAL KEY
-// IMPORTANT: In a production app, load this from environment variables or a secure backend.
-// Do NOT hardcode your API key directly in client-side code.
-const GROQ_API_KEY = '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'; // Replace with your actual Groq API Key
-
-// Function to fetch suggestions from Groq API
-const fetchGroqSuggestions = async (prompt) => {
-    if (GROQ_API_KEY === 'YOUR_GROQ_API_KEY') {
-        console.error("Groq API Key is not set. Please replace 'YOUR_GROQ_API_KEY' with your actual key.");
-        return "Error: Groq API Key not configured.";
-    }
-
-    try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${GROQ_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: 'llama3-8b-8192', // Or another suitable Groq model
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are a helpful mentor providing concise and actionable suggestions based on the user\'s data. Format your response using Markdown.',
-                    },
-                    {
-                        role: 'user',
-                        content: prompt,
-                    },
-                ],
-            }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Groq API Error:', errorData);
-            return `Error fetching suggestions: ${errorData.error?.message || response.statusText}`;
-        }
-
-        const data = await response.json();
-        // Extract the content from the first choice
-        return data.choices[0]?.message?.content || 'No suggestions received.';
-
-    } catch (error) {
-        console.error('Error calling Groq API:', error);
-        return `Error calling Groq API: ${error.message}`;
-    }
-};
-
-
 const Roadmap = () => {
   const { currentUser } = useAuth();
   const [roadmapItems, setRoadmapItems] = useState([]);
@@ -441,7 +390,6 @@ const Roadmap = () => {
   const [editText, setEditText] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
   const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false); // Loading state for suggestions
 
 
   useEffect(() => {
@@ -500,28 +448,42 @@ const Roadmap = () => {
     setRoadmapItems(roadmapItems.filter(item => item.id !== id));
   };
 
-  // Groq API Suggestions Functionality
-  const generateRoadmapSuggestions = async () => {
-      setLoadingSuggestions(true); // Start loading
-      setShowSuggestions(true); // Show the suggestions area immediately
+  // Static Smart Suggestions Functionality
+  const generateRoadmapSuggestions = () => {
+      const totalGoals = roadmapItems.length;
+      const completedGoals = roadmapItems.filter(item => item.completed).length;
+      const incompleteGoals = totalGoals - completedGoals;
+      const oldestIncomplete = roadmapItems.filter(item => !item.completed).sort((a, b) => a.createdAt?.toDate() - b.createdAt?.toDate())[0];
 
-      const roadmapData = roadmapItems.map(item => ({
-          text: item.text,
-          completed: item.completed,
-          createdAt: item.createdAt?.toDate().toISOString() // Include timestamp for context
-      }));
 
-      const prompt = `Analyze the following roadmap goals and provide smart suggestions for achieving them. Consider the number of goals, completed vs incomplete status, and the age of incomplete goals. Make the suggestions actionable and encouraging.
+      let suggestions = `**Roadmap Summary:**\n\n`;
+      suggestions += `- You have **${totalGoals}** goals listed.\n`;
+      suggestions += `- **${completedGoals}** goals are completed.\n`;
+      suggestions += `- **${incompleteGoals}** goals are still in progress.\n\n`;
 
-Roadmap Goals:
-${JSON.stringify(roadmapData, null, 2)}
+      suggestions += `**Suggestions:**\n`;
+      if (incompleteGoals > 0) {
+          if (incompleteGoals > 5) {
+              suggestions += `- Consider prioritizing your top 3-5 most important goals to focus your energy.\n`;
+          }
+          if (oldestIncomplete) {
+               suggestions += `- Your oldest incomplete goal is: "${oldestIncomplete.text}". Consider reviewing or breaking it down.\n`;
+          } else if (incompleteGoals > 0) {
+               suggestions += `- Review your incomplete goals. Are they still relevant? Can you break them into smaller steps?\n`;
+          }
+          suggestions += `- Link your incomplete roadmap goals to specific weekly actions to ensure progress.\n`;
+      } else {
+          suggestions += `- Great job completing all your goals! Consider adding new aspirations to your roadmap to keep growing.\n`;
+          suggestions += `- Reflect on what strategies helped you achieve your goals and apply those to future plans.\n`;
+      }
+       if (totalGoals === 0) {
+           suggestions = `**Roadmap Summary:**\n\n- You haven't added any goals yet.\n\n**Suggestions:**\n- Start by adding your long-term aspirations to the roadmap.\n- Think about what you want to achieve in the next 1, 5, or 10 years.\n`;
+       }
 
-Provide your suggestions in Markdown format.`;
 
-      const suggestions = await fetchGroqSuggestions(prompt);
       setSuggestionsText(suggestions);
-      setLoadingSuggestions(false); // End loading
-      console.log("Generating Groq roadmap suggestions...");
+      setShowSuggestions(true); // Always show suggestions after generating
+      console.log("Generating static roadmap suggestions...");
   };
 
 
@@ -534,35 +496,20 @@ Provide your suggestions in Markdown format.`;
            <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Goal Suggestions</h4> {/* Updated heading and icon, dark mode */}
            <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart analysis and suggestions to help you define and achieve your long-term goals more effectively.</p> {/* Updated description, dark mode */}
            <button
-               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" // Added disabled styles
-               onClick={generateRoadmapSuggestions} // Call the Groq suggestion function
-               disabled={loadingSuggestions} // Disable button while loading
+               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+               onClick={generateRoadmapSuggestions} // Call the static suggestion function
            >
-               {loadingSuggestions ? (
-                   <Loader2 size={20} className="mr-2 animate-spin"/>
-               ) : (
-                   <Lightbulb size={20} className="mr-2"/>
-               )}
-               {loadingSuggestions ? 'Getting Suggestions...' : (showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions')} {/* Change button text */}
+               {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
            </button>
             {showSuggestions && (
                 <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
-                    {loadingSuggestions ? (
-                        <div className="flex items-center text-blue-700 dark:text-blue-200">
-                             <Loader2 size={20} className="mr-2 animate-spin"/> Loading suggestions...
-                        </div>
-                    ) : (
-                         <ReactMarkdown>{suggestionsText}</ReactMarkdown>
-                    )}
-
-                     {!loadingSuggestions && ( // Only show hide button when not loading
-                         <button
-                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
-                            onClick={() => setShowSuggestions(false)} // Hide suggestions
-                        >
-                            Hide Suggestions <ChevronUp size={16} className="ml-1"/>
-                        </button>
-                     )}
+                    <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                     <button
+                        className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
+                        onClick={() => setShowSuggestions(false)} // Hide suggestions
+                    >
+                        Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                    </button>
                 </div>
             )}
        </div>
@@ -640,7 +587,6 @@ const WeeklyActions = () => {
     const [editText, setEditText] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
     const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
-    const [loadingSuggestions, setLoadingSuggestions] = useState(false); // Loading state for suggestions
 
 
     useEffect(() => {
@@ -699,28 +645,39 @@ const WeeklyActions = () => {
         setActions(actions.filter(action => action.id !== id));
     };
 
-     // Groq API Suggestions Functionality
-    const generateActionSuggestions = async () => {
-        setLoadingSuggestions(true); // Start loading
-        setShowSuggestions(true); // Show the suggestions area immediately
+     // Static Smart Suggestions Functionality
+    const generateActionSuggestions = () => {
+        const totalActions = actions.length;
+        const completedActions = actions.filter(action => action.completed).length;
+        const incompleteActions = totalActions - completedActions;
 
-        const actionsData = actions.map(action => ({
-            text: action.text,
-            completed: action.completed,
-            createdAt: action.createdAt?.toDate().toISOString() // Include timestamp for context
-        }));
+        let suggestions = `**Weekly Actions Summary:**\n\n`;
+        suggestions += `- You have **${totalActions}** weekly actions listed.\n`;
+        suggestions += `- **${completedActions}** actions are completed.\n`;
+        suggestions += `- **${incompleteActions}** actions are still in progress.\n\n`;
 
-        const prompt = `Analyze the following weekly actions and provide smart suggestions for completing them and planning for the next week. Consider completed vs incomplete status. Make the suggestions actionable and encouraging.
+        suggestions += `**Suggestions:**\n`;
+        if (incompleteActions > 0) {
+             if (incompleteActions > 3) {
+                 suggestions += `- Focus on completing your top 3 most important actions this week.\n`;
+             }
+            const incompleteList = actions.filter(action => !action.completed).map(action => `- "${action.text}"`).join('\n');
+            if (incompleteList) {
+                 suggestions += `Missed Actions:\n${incompleteList}\n`; // Changed from "Review these incomplete actions"
+                 suggestions += `-- Can any be broken down or rescheduled?\n`;
+            }
+            suggestions += `- Ensure your weekly actions are aligned with your long-term roadmap goals.\n`;
+        } else {
+             suggestions += `- All weekly actions completed! Excellent progress.\n`;
+             suggestions += `- Plan your actions for the upcoming week based on your roadmap and daily habits.\n`;
+        }
+         if (totalActions === 0) {
+            suggestions = `**Weekly Actions Summary:**\n\n- You haven't added any weekly actions yet.\n\n**Suggestions:**\n- Break down your roadmap goals into smaller, actionable steps for this week.\n- What specific tasks will move you closer to your goals this week?\n`;
+        }
 
-Weekly Actions:
-${JSON.stringify(actionsData, null, 2)}
-
-Provide your suggestions in Markdown format.`;
-
-        const suggestions = await fetchGroqSuggestions(prompt);
         setSuggestionsText(suggestions);
-        setLoadingSuggestions(false); // End loading
-        console.log("Generating Groq action suggestions...");
+        setShowSuggestions(true); // Always show suggestions after generating
+        console.log("Generating static action suggestions...");
     };
 
 
@@ -733,34 +690,20 @@ Provide your suggestions in Markdown format.`;
                  <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Action Suggestions</h4> {/* Updated heading and icon, dark mode */}
                  <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart suggestions for your weekly tasks based on your goals and progress.</p> {/* Updated description, dark mode */}
                  <button
-                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" // Added disabled styles
-                     onClick={generateActionSuggestions} // Call the Groq suggestion function
-                     disabled={loadingSuggestions} // Disable button while loading
+                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     onClick={generateActionSuggestions} // Call the static suggestion function
                  >
-                     {loadingSuggestions ? (
-                         <Loader2 size={20} className="mr-2 animate-spin"/>
-                     ) : (
-                         <Lightbulb size={20} className="mr-2"/>
-                     )}
-                     {loadingSuggestions ? 'Getting Suggestions...' : (showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions')} {/* Change button text */}
+                     {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
                  </button>
                  {showSuggestions && (
                      <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
-                         {loadingSuggestions ? (
-                            <div className="flex items-center text-blue-700 dark:text-blue-200">
-                                 <Loader2 size={20} className="mr-2 animate-spin"/> Loading suggestions...
-                            </div>
-                         ) : (
-                             <ReactMarkdown>{suggestionsText}</ReactMarkdown>
-                         )}
-                          {!loadingSuggestions && ( // Only show hide button when not loading
-                             <button
-                                className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
-                                onClick={() => setShowSuggestions(false)} // Hide suggestions
-                            >
-                                Hide Suggestions <ChevronUp size={16} className="ml-1"/>
-                            </button>
-                         )}
+                         <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                          <button
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
+                            onClick={() => setShowSuggestions(false)} // Hide suggestions
+                        >
+                            Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                        </button>
                      </div>
                  )}
              </div>
@@ -774,7 +717,7 @@ Provide your suggestions in Markdown format.`;
                     value={newAction}
                     onChange={(e) => setNewAction(e.target.value)}
                 />
-                 <button
+                <button
                   className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex-shrink-0 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                   onClick={addAction}
                 >
@@ -838,7 +781,6 @@ const DailyHabits = () => {
     const [editText, setEditText] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
     const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
-    const [loadingSuggestions, setLoadingSuggestions] = useState(false); // Loading state for suggestions
 
 
     useEffect(() => {
@@ -1006,30 +948,42 @@ const DailyHabits = () => {
 
     }, [habits, currentUser]);
 
-     // Groq API Suggestions Functionality
-    const generateHabitSuggestions = async () => {
-        setLoadingSuggestions(true); // Start loading
-        setShowSuggestions(true); // Show the suggestions area immediately
+     // Static Smart Suggestions Functionality
+    const generateHabitSuggestions = () => {
+        const totalHabits = habits.length;
+        const completedToday = habits.filter(habit => habit.completedToday).length;
+        const habitsWithStreaks = habits.filter(habit => habit.streak > 0).length;
+        const longestStreak = habits.reduce((max, habit) => Math.max(max, habit.streak || 0), 0);
+        const incompleteHabitsToday = habits.filter(habit => !habit.completedToday);
 
-        const habitsData = habits.map(habit => ({
-            text: habit.text,
-            completedToday: habit.completedToday,
-            streak: habit.streak || 0,
-            lastCompletedAt: habit.lastCompletedAt?.toDate().toISOString(), // Include timestamp for context
-            createdAt: habit.createdAt?.toDate().toISOString() // Include timestamp for context
-        }));
 
-        const prompt = `Analyze the following daily habits and provide smart insights and strategies for building and maintaining consistency. Consider completed status today, current streaks, and habits with no recent completion. Make the suggestions actionable and encouraging.
+        let suggestions = `**Daily Habits Summary:**\n\n`;
+        suggestions += `- You are tracking **${totalHabits}** daily habits.\n`;
+        suggestions += `- You completed **${completedToday}** habits today.\n`;
+        suggestions += `- **${habitsWithStreaks}** habits currently have a streak.\n`;
+        suggestions += `- Your longest current streak is **${longestStreak}** days.\n\n`;
 
-Daily Habits:
-${JSON.stringify(habitsData, null, 2)}
+        suggestions += `**Suggestions:**\n`;
+        if (completedToday < totalHabits) {
+             suggestions += `- You missed ${incompleteHabitsToday.length} habit(s) today.\n`;
+             const missedList = incompleteHabitsToday.map(habit => `- "${habit.text}"`).join('\n');
+             if (missedList) {
+                  suggestions += `Missed Habits:\n${missedList}\n`;
+             }
+             suggestions += `-- Try to complete all your habits tomorrow for a perfect day!\n`;
+             suggestions += `- Identify potential blockers for the habits you missed today.\n`;
+        } else {
+             suggestions += `- Excellent job completing all your habits today! Keep the momentum going.\n`;
+             suggestions += `- Consider adding a new habit to challenge yourself.\n`;
+        }
+         if (totalHabits === 0) {
+            suggestions = `**Daily Habits Summary:**\n\n- You haven't added any daily habits yet.\n\n**Suggestions:**\n- What small actions can you do daily to support your weekly actions and roadmap goals?\n- Start with 1-2 simple habits to build consistency.\n`;
+        }
 
-Provide your suggestions in Markdown format.`;
 
-        const suggestions = await fetchGroqSuggestions(prompt);
         setSuggestionsText(suggestions);
-        setLoadingSuggestions(false); // End loading
-        console.log("Generating Groq habit suggestions...");
+        setShowSuggestions(true); // Always show suggestions after generating
+        console.log("Generating static habit suggestions...");
     };
 
 
@@ -1042,34 +996,20 @@ Provide your suggestions in Markdown format.`;
                  <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Habit Insights</h4> {/* Updated heading and icon, dark mode */}
                  <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart analysis and strategies to help you build and maintain consistent daily habits.</p> {/* Updated description, dark mode */}
                  <button
-                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" // Added disabled styles
-                     onClick={generateHabitSuggestions} // Call the Groq suggestion function
-                     disabled={loadingSuggestions} // Disable button while loading
+                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     onClick={generateHabitSuggestions} // Call the static suggestion function
                  >
-                     {loadingSuggestions ? (
-                         <Loader2 size={20} className="mr-2 animate-spin"/>
-                     ) : (
-                         <Lightbulb size={20} className="mr-2"/>
-                     )}
-                     {loadingSuggestions ? 'Getting Insights...' : (showSuggestions ? 'Refresh Insights' : 'Get Insights')} {/* Change button text */}
+                     {showSuggestions ? 'Refresh Insights' : 'Get Insights'} {/* Change button text */}
                  </button>
                  {showSuggestions && (
                      <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
-                         {loadingSuggestions ? (
-                            <div className="flex items-center text-blue-700 dark:text-blue-200">
-                                 <Loader2 size={20} className="mr-2 animate-spin"/> Loading insights...
-                            </div>
-                         ) : (
-                             <ReactMarkdown>{suggestionsText}</ReactMarkdown>
-                         )}
-                          {!loadingSuggestions && ( // Only show hide button when not loading
-                             <button
-                                className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
-                                onClick={() => setShowSuggestions(false)} // Hide suggestions
-                            >
-                                Hide Suggestions <ChevronUp size={16} className="ml-1"/>
-                            </button>
-                         )}
+                         <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                          <button
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
+                            onClick={() => setShowSuggestions(false)} // Hide suggestions
+                        >
+                            Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                        </button>
                      </div>
                  )}
              </div>
@@ -1157,7 +1097,6 @@ const SkillHoursLog = () => {
     const [editSkillName, setEditSkillName] = useState(''); // State for editing skill name input
     const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
     const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
-    const [loadingSuggestions, setLoadingSuggestions] = useState(false); // Loading state for suggestions
 
 
     useEffect(() => {
@@ -1181,7 +1120,7 @@ const SkillHoursLog = () => {
             }
              const q = query(collection(db, 'skills'), where('userId', '==', currentUser.uid), orderBy('skillName', 'asc'));
              const querySnapshot = await getDocs(q);
-             const fetchedSkills = querySnapshot.docs.map(doc => { return { id: doc.id, ...doc.data() }; }); // Removed extra semicolon here
+             const fetchedSkills = querySnapshot.docs.map(doc => { return { id: doc.id, ...doc.data() }; });
              setSkills(fetchedSkills);
              if (fetchedSkills.length > 0) {
                  setSelectedSkill(fetchedSkills[0].skillName);
@@ -1338,37 +1277,53 @@ const SkillHoursLog = () => {
         return acc;
     }, {});
 
-     // Groq API Suggestions Functionality
-    const generateSkillSuggestions = async () => {
-        setLoadingSuggestions(true); // Start loading
-        setShowSuggestions(true); // Show the suggestions area immediately
+     // Static Smart Suggestions Functionality
+    const generateSkillSuggestions = () => {
+        const skillsLogged = Object.keys(totalTimePerSkill).length;
+        const totalHoursLogged = Object.values(totalTimePerSkill).reduce((sum, hours) => sum + hours, 0);
 
-        const skillsData = skills.map(skill => skill.skillName);
-        const logsData = logs.map(log => ({
-            skill: log.skill,
-            hours: log.hours,
-            timestamp: log.timestamp?.toDate().toISOString() // Include timestamp for context
-        }));
-         const totalTimeData = Object.entries(totalTimePerSkill).map(([skill, totalHours]) => ({ skill, totalHours }));
+        let suggestions = `**Skill Hours Summary:**\n\n`;
+        suggestions += `- You are currently tracking **${skillsLogged}** skills.\n`;
+        suggestions += `- You have logged a total of **${totalHoursLogged.toFixed(1)}** hours across all skills.\n\n`;
+
+        suggestions += `**Suggestions:**\n`;
+        if (skillsLogged > 0) {
+            // Find the skill with the most hours
+            const mostPracticedSkill = Object.entries(totalTimePerSkill).reduce((most, [skill, hours]) => {
+                return hours > most.hours ? { skill, hours } : most;
+            }, { skill: 'N/A', hours: -1 });
+            if (mostPracticedSkill.skill !== 'N/A') {
+                 suggestions += `- Your most practiced skill is "**${mostPracticedSkill.skill}**" with **${mostPracticedSkill.hours.toFixed(1)}** hours.\n`;
+            }
+
+            // Find skills with less than a certain number of hours (e.g., 10 hours)
+            const lessPracticedSkills = Object.entries(totalTimePerSkill).filter(([skill, hours]) => hours < 10);
+            if (lessPracticedSkills.length > 0) {
+                 suggestions += `- Consider dedicating more time to less practiced skills like ${lessPracticedSkills.map(([skill, hours]) => `"${skill}" (${hours.toFixed(1)} hrs)`).join(', ')}.\n`;
+            }
+
+             // Find skills with no recent logs (e.g., last 30 days) - Requires filtering logs by timestamp
+             const thirtyDaysAgo = Timestamp.now().toDate();
+             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+             const recentLogs = logs.filter(log => log.timestamp?.toDate() >= thirtyDaysAgo);
+             const recentSkills = new Set(recentLogs.map(log => log.skill));
+             const inactiveSkills = skills.filter(skill => !recentSkills.has(skill.skillName));
+
+             if (inactiveSkills.length > 0) {
+                  suggestions += `- You haven't logged hours for skills like ${inactiveSkills.map(skill => `"${skill.skillName}"`).join(', ')} recently. Try to incorporate them back into your practice.\n`;
+             }
 
 
-        const prompt = `Analyze the following skill logs and total time spent per skill. Provide smart suggestions for skill development, including which skills to focus on, based on the data. Consider total hours logged, skills with less time, and skills with no recent logs. Make the suggestions actionable and encouraging.
+             suggestions += `- Review your roadmap goals and ensure your logged skills align with the skills you need to develop.\n`;
+        } else {
+            suggestions += `- You haven't logged any skill hours yet. Add some skills and start tracking your progress!\n`;
+            suggestions += `- Think about the skills you need to develop to achieve your roadmap goals and add them here.\n`;
+        }
 
-Available Skills:
-${JSON.stringify(skillsData, null, 2)}
 
-Skill Log History:
-${JSON.stringify(logsData, null, 2)}
-
-Total Time Per Skill:
-${JSON.stringify(totalTimeData, null, 2)}
-
-Provide your suggestions in Markdown format.`;
-
-        const suggestions = await fetchGroqSuggestions(prompt);
         setSuggestionsText(suggestions);
-        setLoadingSuggestions(false); // End loading
-        console.log("Generating Groq skill suggestions...");
+        setShowSuggestions(true); // Always show suggestions after generating
+        console.log("Generating static skill suggestions...");
     };
 
 
@@ -1381,34 +1336,20 @@ Provide your suggestions in Markdown format.`;
                  <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Skill Suggestions</h4> {/* Updated heading and icon, dark mode */}
                  <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart suggestions for skill development based on your goals and logged hours.</p> {/* Updated description, dark mode */}
                  <button
-                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" // Added disabled styles
-                     onClick={generateSkillSuggestions} // Call the Groq suggestion function
-                     disabled={loadingSuggestions} // Disable button while loading
+                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     onClick={generateSkillSuggestions} // Call the static suggestion function
                  >
-                     {loadingSuggestions ? (
-                         <Loader2 size={20} className="mr-2 animate-spin"/>
-                     ) : (
-                         <Lightbulb size={20} className="mr-2"/>
-                     )}
-                     {loadingSuggestions ? 'Getting Suggestions...' : (showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions')} {/* Change button text */}
+                     {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
                  </button>
                  {showSuggestions && (
                      <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
-                         {loadingSuggestions ? (
-                            <div className="flex items-center text-blue-700 dark:text-blue-200">
-                                 <Loader2 size={20} className="mr-2 animate-spin"/> Loading suggestions...
-                            </div>
-                         ) : (
-                             <ReactMarkdown>{suggestionsText}</ReactMarkdown>
-                         )}
-                          {!loadingSuggestions && ( // Only show hide button when not loading
-                             <button
-                                className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
-                                onClick={() => setShowSuggestions(false)} // Hide suggestions
-                            >
-                                Hide Suggestions <ChevronUp size={16} className="ml-1"/>
-                            </button>
-                         )}
+                         <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                          <button
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
+                            onClick={() => setShowSuggestions(false)} // Hide suggestions
+                        >
+                            Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                        </button>
                      </div>
                  )}
              </div>
@@ -1648,7 +1589,6 @@ const PersonalBrandFeed = () => {
     const [editText, setEditText] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
     const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
-    const [loadingSuggestions, setLoadingSuggestions] = useState(false); // Loading state for suggestions
 
 
     useEffect(() => {
@@ -1697,27 +1637,34 @@ const PersonalBrandFeed = () => {
         setFeedItems(feedItems.filter(item => item.id !== id));
     };
 
-     // Groq API Suggestions Functionality
-    const generateContentSuggestions = async () => {
-        setLoadingSuggestions(true); // Start loading
-        setShowSuggestions(true); // Show the suggestions area immediately
+     // Static Smart Suggestions Functionality
+    const generateContentSuggestions = () => {
+        const totalItems = feedItems.length;
+        const latestItem = feedItems.length > 0 ? feedItems[0] : null;
 
-        const feedData = feedItems.map(item => ({
-            text: item.text,
-            createdAt: item.createdAt?.toDate().toISOString() // Include timestamp for context
-        }));
 
-        const prompt = `Analyze the following personal brand feed entries and provide smart content ideas and suggestions for building a personal brand. Consider recent entries and the overall themes. Make the suggestions actionable and encouraging.
+        let suggestions = `**Personal Brand Feed Summary:**\n\n`;
+        suggestions += `- You have **${totalItems}** entries in your feed.\n`;
+        if (latestItem) {
+             suggestions += `- Your most recent entry is: "${latestItem.text}" (added ${latestItem.createdAt?.toDate().toLocaleDateString()}).\n\n`;
+        } else {
+             suggestions += `- Your personal brand feed is currently empty.\n\n`;
+        }
 
-Personal Brand Feed Entries:
-${JSON.stringify(feedData, null, 2)}
 
-Provide your suggestions in Markdown format.`;
+        suggestions += `**Suggestions:**\n`;
+        if (totalItems > 0) {
+            suggestions += `- Review your recent entries and identify common themes or topics you can expand on.\n`;
+            suggestions += `- Consider sharing your progress on a specific skill or roadmap goal in your feed.\n`;
+            suggestions += `- Think about what kind of content would be valuable to your professional network.\n`;
+        } else {
+            suggestions += `- Use this space to track ideas for social media posts, articles, or networking topics.\n`;
+            suggestions += `- Start by adding a note about a recent accomplishment or a topic you're learning about.\n`;
+        }
 
-        const suggestions = await fetchGroqSuggestions(prompt);
         setSuggestionsText(suggestions);
-        setLoadingSuggestions(false); // End loading
-        console.log("Generating Groq content suggestions...");
+        setShowSuggestions(true); // Always show suggestions after generating
+        console.log("Generating static content suggestions...");
     };
 
 
@@ -1730,34 +1677,20 @@ Provide your suggestions in Markdown format.`;
                  <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Content Suggestions</h4> {/* Updated heading and icon, dark mode */}
                  <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart content ideas and suggestions to help you build your personal brand.</p> {/* Updated description, dark mode */}
                  <button
-                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" // Added disabled styles
-                     onClick={generateContentSuggestions} // Call the Groq suggestion function
-                     disabled={loadingSuggestions} // Disable button while loading
+                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     onClick={generateContentSuggestions} // Call the static suggestion function
                  >
-                      {loadingSuggestions ? (
-                         <Loader2 size={20} className="mr-2 animate-spin"/>
-                     ) : (
-                         <Lightbulb size={20} className="mr-2"/>
-                     )}
-                     {loadingSuggestions ? 'Getting Suggestions...' : (showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions')} {/* Change button text */}
+                     {showSuggestions ? 'Refresh Suggestions' : 'Get Suggestions'} {/* Change button text */}
                  </button>
                  {showSuggestions && (
                      <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
-                          {loadingSuggestions ? (
-                            <div className="flex items-center text-blue-700 dark:text-blue-200">
-                                 <Loader2 size={20} className="mr-2 animate-spin"/> Loading suggestions...
-                            </div>
-                         ) : (
-                             <ReactMarkdown>{suggestionsText}</ReactMarkdown>
-                         )}
-                          {!loadingSuggestions && ( // Only show hide button when not loading
-                             <button
-                                className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
-                                onClick={() => setShowSuggestions(false)} // Hide suggestions
-                            >
-                                Hide Suggestions <ChevronUp size={16} className="ml-1"/>
-                            </button>
-                         )}
+                         <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                          <button
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
+                            onClick={() => setShowSuggestions(false)} // Hide suggestions
+                        >
+                            Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                        </button>
                      </div>
                  )}
              </div>
@@ -1841,7 +1774,6 @@ const Finance = () => {
     const [editType, setEditType] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false); // State to toggle suggestions visibility
     const [suggestionsText, setSuggestionsText] = useState(''); // State to hold suggestions
-    const [loadingSuggestions, setLoadingSuggestions] = useState(false); // Loading state for suggestions
 
 
     useEffect(() => {
@@ -1910,29 +1842,50 @@ const Finance = () => {
     const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
     const netBalance = totalIncome - totalExpense;
 
-     // Groq API Suggestions Functionality
-    const generateFinancialSuggestions = async () => {
-        setLoadingSuggestions(true); // Start loading
-        setShowSuggestions(true); // Show the suggestions area immediately
+     // Static Smart Suggestions Functionality
+    const generateFinancialSuggestions = () => {
+        const totalTransactions = transactions.length;
+        const highestExpense = transactions.filter(t => t.type === 'expense').reduce((max, t) => Math.max(max, t.amount), 0);
+        const highestIncome = transactions.filter(t => t.type === 'income').reduce((max, t) => Math.max(max, t.amount), 0);
 
-        const transactionsData = transactions.map(t => ({
-            description: t.description,
-            amount: t.amount,
-            type: t.type,
-            timestamp: t.timestamp?.toDate().toISOString() // Include timestamp for context
-        }));
 
-        const prompt = `Analyze the following financial transactions (income and expenses) and provide smart insights and tips for managing finances. Consider total income, total expense, net balance, and individual transactions. Make the suggestions actionable and encouraging.
+        let suggestions = `**Financial Summary:**\n\n`;
+        suggestions += `- You have recorded **${totalTransactions}** transactions.\n`;
+        suggestions += `- Your total income is **$${totalIncome.toFixed(2)}**.\n`;
+        suggestions += `- Your total expense is **$${totalExpense.toFixed(2)}**.\n`;
+        suggestions += `- Your current net balance is **$${netBalance.toFixed(2)}**.\n\n`;
 
-Financial Transactions:
-${JSON.stringify(transactionsData, null, 2)}
+        suggestions += `**Suggestions:**\n`;
+        if (netBalance < 0) {
+            suggestions += `- Your expenses currently exceed your income. Review your recent transactions to identify areas where you can reduce spending.\n`;
+            suggestions += `- Consider setting a budget for different expense categories.\n`;
+        } else if (netBalance > 0) {
+            suggestions += `- Your income exceeds your expenses. Consider setting a savings goal or investing.\n`;
+            suggestions += `- Review your income sources and explore ways to increase them.\n`;
+        } else {
+             suggestions += `- Your income and expenses are balanced. Ensure this aligns with your long-term financial goals.\n`;
+        }
 
-Provide your suggestions in Markdown format.`;
+        if (highestExpense > 0) {
+             suggestions += `- Your highest single expense recorded is **$${highestExpense.toFixed(2)}**.\n`;
+        }
+         if (highestIncome > 0) {
+             suggestions += `- Your highest single income recorded is **$${highestIncome.toFixed(2)}**.\n`;
+        }
 
-        const suggestions = await fetchGroqSuggestions(prompt);
+        // Simple check for high expenses relative to income
+        if (totalIncome > 0 && totalExpense / totalIncome > 0.8) { // If expenses are more than 80% of income
+             suggestions += `- Your expenses are relatively high compared to your income. Look for opportunities to reduce spending or increase income.\n`;
+        }
+
+         if (totalTransactions === 0) {
+             suggestions = `**Financial Summary:**\n\n- You haven't added any financial transactions yet.\n\n**Suggestions:**\n- Start by logging your income and expenses to get a clear picture of your finances.\n- Tracking your spending is the first step to better financial management.\n`;
+         }
+
+
         setSuggestionsText(suggestions);
-        setLoadingSuggestions(false); // End loading
-        console.log("Generating Groq financial suggestions...");
+        setShowSuggestions(true); // Always show suggestions after generating
+        console.log("Generating static financial suggestions...");
     };
 
 
@@ -1945,34 +1898,20 @@ Provide your suggestions in Markdown format.`;
                  <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center"><Lightbulb size={20} className="mr-2"/> Smart Financial Insights</h4> {/* Updated heading and icon, dark mode */}
                  <p className="text-blue-700 dark:text-blue-200 text-sm mb-3">Get smart insights and tips to help you manage your finances effectively.</p> {/* Updated description, dark mode */}
                  <button
-                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" // Added disabled styles
-                     onClick={generateFinancialSuggestions} // Call the Groq suggestion function
-                     disabled={loadingSuggestions} // Disable button while loading
+                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center"
+                     onClick={generateFinancialSuggestions} // Call the static suggestion function
                  >
-                     {loadingSuggestions ? (
-                         <Loader2 size={20} className="mr-2 animate-spin"/>
-                     ) : (
-                         <Lightbulb size={20} className="mr-2"/>
-                     )}
-                     {loadingSuggestions ? 'Getting Insights...' : (showSuggestions ? 'Refresh Insights' : 'Get Insights')} {/* Change button text */}
+                     {showSuggestions ? 'Refresh Insights' : 'Get Insights'} {/* Change button text */}
                  </button>
                  {showSuggestions && (
                      <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100 whitespace-pre-wrap transition-colors duration-200"> {/* Added dark mode */}
-                         {loadingSuggestions ? (
-                            <div className="flex items-center text-blue-700 dark:text-blue-200">
-                                 <Loader2 size={20} className="mr-2 animate-spin"/> Loading insights...
-                            </div>
-                         ) : (
-                             <ReactMarkdown>{suggestionsText}</ReactMarkdown>
-                         )}
-                          {!loadingSuggestions && ( // Only show hide button when not loading
-                             <button
-                                className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
-                                onClick={() => setShowSuggestions(false)} // Hide suggestions
-                            >
-                                Hide Suggestions <ChevronUp size={16} className="ml-1"/>
-                            </button>
-                         )}
+                         <ReactMarkdown>{suggestionsText}</ReactMarkdown> {/* Use ReactMarkdown */}
+                          <button
+                            className="mt-3 text-blue-700 hover:text-blue-900 text-sm font-semibold flex items-center dark:text-blue-300 dark:hover:text-blue-100" // Dark mode
+                            onClick={() => setShowSuggestions(false)} // Hide suggestions
+                        >
+                            Hide Suggestions <ChevronUp size={16} className="ml-1"/>
+                        </button>
                      </div>
                  )}
              </div>
@@ -2432,7 +2371,7 @@ const Dashboard = () => {
               className={`${activeTab === 'mvpTestLauncher' ? 'border-blue-600 text-blue-700 font-bold dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500 font-medium'} whitespace-nowrap py-3 px-1 border-b-2 text-base transition duration-200 flex items-center`} // Dark mode
               onClick={() => setActiveTab('mvpTestLauncher')}
             >
-              <Target size={20} className="mr-2"/> MVP Test Launcher
+              MVP Test Launcher
             </button>
              <button
                // Added data-tab attribute
@@ -2541,12 +2480,6 @@ const App = () => {
             transition: all 0.2s ease-in-out;
           }
           /* Custom style for disabled buttons */
-          .disabled\\:opacity-50:disabled {
-              opacity: 0.5;
-          }
-           .disabled\\:cursor-not-allowed:disabled {
-               cursor: not-allowed;
-           }
           .bg-gray-400.cursor-not-allowed.text-gray-700:hover {
               transform: none;
           }
