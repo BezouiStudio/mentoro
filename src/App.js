@@ -511,8 +511,11 @@ const Roadmap = () => {
           createdAt: item.createdAt?.toDate().toISOString() // Include timestamp for context
       }));
 
-      const prompt = `Analyze the following roadmap goals and provide smart suggestions for achieving them. Consider the number of goals, completed vs incomplete status, and the age of incomplete goals. Make the suggestions actionable and encouraging.
+      const currentDate = new Date();
+      const formattedDate = currentDate.toDateString();
 
+      const prompt = `Analyze the following roadmap goals and provide smart suggestions for achieving them. Consider the number of goals, completed vs incomplete status, and the age of incomplete goals. Make the suggestions actionable and encouraging.
+Current Date: ${formattedDate}
 Roadmap Goals:
 ${JSON.stringify(roadmapData, null, 2)}
 
@@ -710,8 +713,11 @@ const WeeklyActions = () => {
             createdAt: action.createdAt?.toDate().toISOString() // Include timestamp for context
         }));
 
-        const prompt = `Analyze the following weekly actions and provide smart suggestions for completing them and planning for the next week. Consider completed vs incomplete status. Make the suggestions actionable and encouraging.
+        const currentDate = new Date();
+        const formattedDate = currentDate.toDateString();
 
+        const prompt = `Analyze the following weekly actions and provide smart suggestions for completing them and planning for the next week. Consider completed vs incomplete status. Make the suggestions actionable and encouraging.
+Current Date: ${formattedDate}
 Weekly Actions:
 ${JSON.stringify(actionsData, null, 2)}
 
@@ -1019,8 +1025,11 @@ const DailyHabits = () => {
             createdAt: habit.createdAt?.toDate().toISOString() // Include timestamp for context
         }));
 
-        const prompt = `Analyze the following daily habits and provide smart insights and strategies for building and maintaining consistency. Consider completed status today, current streaks, and habits with no recent completion. Make the suggestions actionable and encouraging.
+        const currentDate = new Date();
+        const formattedDate = currentDate.toDateString();
 
+        const prompt = `Analyze the following daily habits and provide smart insights and strategies for building and maintaining consistency. Consider completed status today, current streaks, and habits with no recent completion. Make the suggestions actionable and encouraging.
+Current Date: ${formattedDate}
 Daily Habits:
 ${JSON.stringify(habitsData, null, 2)}
 
@@ -1351,9 +1360,11 @@ const SkillHoursLog = () => {
         }));
          const totalTimeData = Object.entries(totalTimePerSkill).map(([skill, totalHours]) => ({ skill, totalHours }));
 
+         const currentDate = new Date();
+         const formattedDate = currentDate.toDateString();
 
         const prompt = `Analyze the following skill logs and total time spent per skill. Provide smart suggestions for skill development, including which skills to focus on, based on the data. Consider total hours logged, skills with less time, and skills with no recent logs. Make the suggestions actionable and encouraging.
-
+Current Date: ${formattedDate}
 Available Skills:
 ${JSON.stringify(skillsData, null, 2)}
 
@@ -1707,8 +1718,11 @@ const PersonalBrandFeed = () => {
             createdAt: item.createdAt?.toDate().toISOString() // Include timestamp for context
         }));
 
-        const prompt = `Analyze the following personal brand feed entries and provide smart content ideas and suggestions for building a personal brand. Consider recent entries and the overall themes. Make the suggestions actionable and encouraging.
+        const currentDate = new Date();
+        const formattedDate = currentDate.toDateString();
 
+        const prompt = `Analyze the following personal brand feed entries and provide smart content ideas and suggestions for building a personal brand. Consider recent entries and the overall themes. Make the suggestions actionable and encouraging.
+Current Date: ${formattedDate}
 Personal Brand Feed Entries:
 ${JSON.stringify(feedData, null, 2)}
 
@@ -1922,8 +1936,11 @@ const Finance = () => {
             timestamp: t.timestamp?.toDate().toISOString() // Include timestamp for context
         }));
 
-        const prompt = `Analyze the following financial transactions (income and expenses) and provide smart insights and tips for managing finances. Consider total income, total expense, net balance, and individual transactions. Make the suggestions actionable and encouraging.
+        const currentDate = new Date();
+        const formattedDate = currentDate.toDateString();
 
+        const prompt = `Analyze the following financial transactions (income and expenses) and provide smart insights and tips for managing finances. Consider total income, total expense, net balance, and individual transactions. Make the suggestions actionable and encouraging.
+Current Date: ${formattedDate}
 Financial Transactions:
 ${JSON.stringify(transactionsData, null, 2)}
 
