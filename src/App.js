@@ -27,7 +27,7 @@ import {
 } from 'firebase/firestore';
 
 // Import Lucide Icons
-import { Plus, Edit, Trash2, Save, Check, X, DollarSign, Clock, Target, Feather, Briefcase, CalendarDays, ListTodo, BarChart2, LogOut, Settings, Mail, Lock, Lightbulb, ChevronDown, ChevronUp, Menu, X as CloseIcon, Moon, Sun, Monitor, Loader2 } from 'lucide-react'; // Added Loader2 for loading indicator
+import { Plus, Edit, Trash2, Save, Check, X, DollarSign, Clock, Target, Feather, Briefcase, CalendarDays, ListTodo, BarChart2, LogOut, Settings, Mail, Lock, Lightbulb, ChevronDown, ChevronUp, Menu, X as CloseIcon, Moon, Sun, Monitor, Loader2, TrendingUp, TrendingDown, Wallet } from 'lucide-react'; // Added Loader2, TrendingUp, TrendingDown, Wallet for Finance section
 
 
 // Import React Markdown for rendering suggestions
@@ -41,7 +41,7 @@ const firebaseConfig = {
   projectId: "mentoro-16b0f",
   storageBucket: "mentoro-16b0f.firebasestorage.app",
   messagingSenderId: "683339820589",
-  appId: "1:683339820589:web:44fce3970fac92c411192a4",
+  appId: "1:683339820589:web:44fce3970fac92c411192a2",
   measurementId: "G-XF2K333FL7"
 };
 
@@ -1995,36 +1995,36 @@ Provide your suggestions in Markdown format.`;
              </div>
 
 
-            <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
+            <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
                 <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Add Transaction</h4> {/* Dark mode */}
-                 <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-grow">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end"> {/* Use grid for better layout */}
+                    <div className="col-span-full sm:col-span-1 lg:col-span-2"> {/* Description takes more space */}
                         <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="description"> {/* Dark mode */}
                             Description
                         </label>
                         <input
                             type="text"
                             className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
-                            placeholder="Description"
+                            placeholder="e.g., Freelance work, Software subscription"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
                     </div>
-                    <div>
+                    <div> {/* Amount */}
                         <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="amount"> {/* Dark mode */}
                             Amount
                         </label>
                         <input
                             type="number"
                             className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
-                            placeholder="Amount"
+                            placeholder="e.g., 100.50"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             min="0.01"
                             step="0.01"
                         />
                     </div>
-                    <div>
+                    <div> {/* Type */}
                          <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="type"> {/* Dark mode */}
                             Type
                         </label>
@@ -2038,7 +2038,7 @@ Provide your suggestions in Markdown format.`;
                         </select>
                     </div>
                      <button
-                        className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 self-end flex-shrink-0 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
+                        className="col-span-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 transform hover:scale-105 flex items-center justify-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" // Minimal button style, dark mode
                         onClick={addTransaction}
                     >
                         <Plus className="mr-2" size={20} /> Add Transaction
@@ -2047,37 +2047,42 @@ Provide your suggestions in Markdown format.`;
             </div>
 
             {/* Summary */}
-            <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
-                 <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Summary</h4> {/* Dark mode */}
-                <p className="text-gray-700 dark:text-gray-200 text-lg mb-2"> {/* Dark mode */}
-                    <strong className="text-emerald-600 dark:text-emerald-400">Total Income:</strong> ${totalIncome.toFixed(2)} {/* Updated color, dark mode */}
-                </p>
-                <p className="text-gray-700 dark:text-gray-200 text-lg mb-2"> {/* Dark mode */}
-                    <strong className="text-red-600 dark:text-red-400">Total Expense:</strong> ${totalExpense.toFixed(2)}
-                </p>
-                <p className="text-gray-800 dark:text-gray-100 text-xl font-bold"> {/* Dark mode */}
-                    Net Balance: ${netBalance.toFixed(2)}
-                </p>
+            <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
+                 <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 flex items-center"><Wallet className="mr-2 text-blue-600 dark:text-blue-400" size={24} /> Summary</h4> {/* Dark mode */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center"> {/* Grid for summary items */}
+                    <div className="p-4 bg-emerald-100 dark:bg-emerald-900 rounded-lg border border-emerald-200 dark:border-emerald-700"> {/* Income card */}
+                        <p className="text-emerald-800 dark:text-emerald-300 text-lg font-semibold mb-1">Total Income</p> {/* Dark mode */}
+                        <p className="text-emerald-600 dark:text-emerald-400 text-2xl font-bold">${totalIncome.toFixed(2)}</p> {/* Dark mode */}
+                    </div>
+                    <div className="p-4 bg-red-100 dark:bg-red-900 rounded-lg border border-red-200 dark:border-red-700"> {/* Expense card */}
+                         <p className="text-red-800 dark:text-red-300 text-lg font-semibold mb-1">Total Expense</p> {/* Dark mode */}
+                        <p className="text-red-600 dark:text-red-400 text-2xl font-bold">${totalExpense.toFixed(2)}</p> {/* Dark mode */}
+                    </div>
+                    <div className={`p-4 rounded-lg border ${netBalance >= 0 ? 'bg-blue-100 dark:bg-blue-900 border-blue-200 dark:border-blue-700' : 'bg-red-100 dark:bg-red-900 border-red-200 dark:border-red-700'}`}> {/* Net Balance card */}
+                         <p className={`text-lg font-semibold mb-1 ${netBalance >= 0 ? 'text-blue-800 dark:text-blue-300' : 'text-red-800 dark:text-red-300'}`}>Net Balance</p> {/* Dark mode */}
+                        <p className={`text-2xl font-bold ${netBalance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}`}>${netBalance.toFixed(2)}</p> {/* Dark mode */}
+                    </div>
+                </div>
             </div>
 
             {/* Transaction History */}
-            <div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
-                <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Transaction History</h4> {/* Dark mode */}
+            <div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 transition-colors duration-200"> {/* Dark mode */}
+                <h4 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 flex items-center"><Briefcase className="mr-2 text-blue-600 dark:text-blue-400" size={24} /> Transaction History</h4> {/* Dark mode */}
                  <ul>
                     {transactions.map(transaction => (
                         <li key={transaction.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 dark:border-gray-600 shadow-sm transition-colors duration-200"> {/* Dark mode */}
                              {editingTransaction === transaction.id ? (
-                                <div className="flex-grow flex flex-col sm:flex-row gap-3 mr-2 w-full sm:w-auto mb-2 sm:mb-0">
+                                <div className="flex-grow grid grid-cols-1 sm:grid-cols-3 gap-3 mr-2 w-full sm:w-auto mb-2 sm:mb-0"> {/* Use grid for editing */}
                                     <input
                                         type="text"
-                                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 flex-grow bg-white dark:bg-gray-700" // Dark mode
+                                        className="col-span-full sm:col-span-1 shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white dark:bg-gray-700" // Dark mode
                                         value={editDescription}
                                         onChange={(e) => setEditDescription(e.target.value)}
                                         placeholder="Description"
                                     />
                                      <input
                                         type="number"
-                                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-20 bg-white dark:bg-gray-700" // Dark mode
+                                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-auto bg-white dark:bg-gray-700" // Dark mode
                                         value={editAmount}
                                         onChange={(e) => setEditAmount(e.target.value)}
                                         min="0.01"
@@ -2085,7 +2090,7 @@ Provide your suggestions in Markdown format.`;
                                         placeholder="Amount"
                                     />
                                      <select
-                                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-24 bg-white dark:bg-gray-700" // Dark mode
+                                        className="shadow-sm appearance-none border border-gray-300 dark:border-gray-600 rounded-lg w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-auto bg-white dark:bg-gray-700" // Dark mode
                                         value={editType}
                                         onChange={(e) => setEditType(e.target.value)}
                                     >
@@ -2094,8 +2099,9 @@ Provide your suggestions in Markdown format.`;
                                     </select>
                                 </div>
                              ) : (
-                                <span className={`flex-grow text-lg mr-2 mb-2 sm:mb-0 ${transaction.type === 'expense' ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}> {/* Updated income text color, dark mode */}
-                                    <strong className="text-gray-900 dark:text-gray-50">{transaction.description}:</strong> ${transaction.amount.toFixed(2)} ({transaction.type}) - <span className="text-sm text-gray-600 dark:text-gray-400">{transaction.timestamp?.toDate().toLocaleString()}</span> {/* Dark mode */}
+                                <span className={`flex-grow text-lg mr-2 mb-2 sm:mb-0 flex items-center ${transaction.type === 'expense' ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}> {/* Updated income text color, dark mode */}
+                                     {transaction.type === 'income' ? <TrendingUp size={20} className="mr-2"/> : <TrendingDown size={20} className="mr-2"/>} {/* Icon based on type */}
+                                    <strong className="text-gray-900 dark:text-gray-50 mr-1">{transaction.description}:</strong> ${transaction.amount.toFixed(2)} ({transaction.type}) - <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">{transaction.timestamp?.toDate().toLocaleString()}</span> {/* Dark mode */}
                                 </span>
                             )}
                             <div className="flex gap-2 flex-shrink-0">
@@ -2617,6 +2623,17 @@ const App = () => {
            .dark .bg-gray-200.text-gray-800:hover {
                background-color: #6b7280; /* Even darker gray on hover */
            }
+
+            /* Dark mode for Finance Summary Cards */
+            .dark .bg-emerald-100 { background-color: #064e3b; } /* Darker emerald */
+            .dark .border-emerald-200 { border-color: #059669; } /* Darker emerald border */
+            .dark .text-emerald-800 { color: #a7f3d0; } /* Lighter emerald text */
+            .dark .text-emerald-600 { color: #6ee7b7; } /* Lighter emerald text */
+
+            .dark .bg-red-100 { background-color: #7f1d1d; } /* Darker red */
+            .dark .border-red-200 { border-color: #ef4444; } /* Darker red border */
+            .dark .text-red-800 { color: #fecaca; } /* Lighter red text */
+            .dark .text-red-600 { color: #fca5a5; } /* Lighter red text */
 
 
           `}
